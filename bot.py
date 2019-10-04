@@ -6,6 +6,8 @@ import telebot
 import vk
 import settings
 import time
+import urllib.request
+import re
 from telebot import util
 from datetime import datetime
 
@@ -52,6 +54,15 @@ def get_info(message):
                    'screen_name, maiden_name, crop_photo, career, military,'
                    'can_be_invited_group',
             user_ids=at_text.lower())
+
+        '''parsing reg date'''
+        link = settings.FOAF_LINK + str(get_json[0]['id'])
+        with urllib.request.urlopen(link) as response:
+            vk_xml = response.read().decode("windows-1251")
+
+        parsed_xml = re.findall(r'ya:created dc:date="(.*)"', vk_xml)
+        get_json[0].update({"reg_date": parsed_xml})
+        ''' parsing reg date'''
 
         ready_json = json.dumps(get_json, indent=2, ensure_ascii=False)
 

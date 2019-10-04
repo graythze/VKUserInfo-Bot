@@ -18,6 +18,6 @@ You need to set variables in settings.py:
 [1]: https://vk.com/dev/users.get "API method"
 [2]: https://telegram.me/BotFather "Open @BotFather in Telegram"
 [3]: https://vk.com/dev/implicit_flow_user "Implicit Flow for User Access Token"
-[4]: https://telegram.me/@VKUserInfo_bot "Contact @VKUserInfo_bot"
+[4]: https://telegram.me/VKUserInfo_bot "Contact @VKUserInfo_bot"
 [5]: https://github.com/eternnoir/pyTelegramBotAPI "pyTelegramBotAPI at Github"
 [6]: https://github.com/voronind/vk "VK at Github"
