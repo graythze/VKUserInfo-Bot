@@ -73,13 +73,17 @@ def get_info(message):
             pass
 
         try:
-            if get_json[0]['first_name'] == get_json[0]['first_name']:
+            if get_json[0]['first_name'] == "":
+                pass
+            else:
                 dict["First name"] = get_json[0]['first_name']
         except:
             pass
 
         try:
-            if get_json[0]['last_name'] == get_json[0]['last_name']:
+            if get_json[0]['last_name'] == "":
+                pass
+            else:
                 dict["Last name"] = get_json[0]['last_name']
         except:
             pass
@@ -90,6 +94,42 @@ def get_info(message):
                     dict["Page status"] = "Deleted"
                 else:
                     dict["Page status"] = "Blocked"
+        except:
+            pass
+
+        try:
+            if get_json[0]["can_write_private_message"] == get_json[0]["can_write_private_message"]:
+                if get_json[0]["can_write_private_message"] == 0:
+                    dict["PM"] = "Not allowed"
+                else:
+                    dict["PM"] = "Allowed"
+        except:
+            pass
+
+        try:
+            if get_json[0]["can_see_all_posts"] == get_json[0]["can_see_all_posts"]:
+                if get_json[0]["can_see_all_posts"] == 0:
+                    dict["See all posts"] = "Not allowed"
+                else:
+                    dict["See all posts"] = "Allowed"
+        except:
+            pass
+
+        try:
+            if get_json[0]["can_post"] == get_json[0]["can_post"]:
+                if get_json[0]["can_post"] == 0:
+                    dict["Posting"] = "Not allowed"
+                else:
+                    dict["Posting"] = "Allowed"
+        except:
+            pass
+
+        try:
+            if get_json[0]["can_see_audio"] == get_json[0]["can_see_audio"]:
+                if get_json[0]["can_see_audio"] == 0:
+                    dict["Audio"] = "Not allowed"
+                else:
+                    dict["Audio"] = "Allowed"
         except:
             pass
 
@@ -418,15 +458,15 @@ def get_info(message):
                 try:
                     if get_json[0]["personal"]["alcohol"] == get_json[0]["personal"]["alcohol"]:
                         if get_json[0]["personal"]["alcohol"] == 1:
-                            dict["Personal"]["Smoking"] = "very negative"
+                            dict["Personal"]["Alcohol"] = "Very negative"
                         if get_json[0]["personal"]["alcohol"] == 2:
-                            dict["Personal"]["Smoking"] = "Negative"
+                            dict["Personal"]["Alcohol"] = "Negative"
                         if get_json[0]["personal"]["alcohol"] == 3:
-                            dict["Personal"]["Smoking"] = "Neutral"
+                            dict["Personal"]["Alcohol"] = "Neutral"
                         if get_json[0]["personal"]["alcohol"] == 4:
-                            dict["Personal"]["Smoking"] = "Compromisable"
+                            dict["Personal"]["Alcohol"] = "Compromisable"
                         if get_json[0]["personal"]["alcohol"] == 5:
-                            dict["Personal"]["Smoking"] = "Positive"
+                            dict["Personal"]["Alcohol"] = "Positive"
                 except:
                     pass
         except:
@@ -452,15 +492,21 @@ def get_info(message):
 
         try:
             if get_json[0]["instagram"] == get_json[0]["instagram"]:
-                dict["Instagram"] = get_json[0]["instagram"]
+                dict["Instagram"] = "https://www.instagram.com/" + get_json[0]["instagram"]
         except:
             pass
 
         try:
-            if get_json[0]["facebook"] == "":
-                pass
+            if get_json[0]["twitter"] == get_json[0]["twitter"]:
+                dict["Twitter"] = "https://twitter.com/" + get_json[0]["twitter"]
+        except:
+            pass
+
+        try:
+            if get_json[0]["facebook"] == get_json[0]["facebook"]:
+                dict["Facebook"] = "http://facebook.com/profile.php?id=" + get_json[0]["facebook"]
             else:
-                dict["Facebook ID"] = get_json[0]["facebook"]
+                pass
         except:
             pass
 
@@ -485,10 +531,33 @@ def get_info(message):
             pass
 
         try:
-            if get_json[0]["reg_date"] == get_json[0]["reg_date"]:
-                dict["Registered"] = get_json[0]["reg_date"]
-            else:
+            if len(get_json[0]["reg_date"]) == 0:
                 pass
+            else:
+                dict["Registered"] = get_json[0]["reg_date"]
+        except:
+            pass
+
+        try:
+            full_size_ava = max(get_json[0]["crop_photo"]["photo"]['sizes'],
+                                key=lambda line: int(line['width']))
+            dict["Full-size avatar"] = full_size_ava['url']
+        except:
+            pass
+
+        try:
+            if get_json[0]["crop_photo"]["photo"]["date"] == get_json[0]["crop_photo"]["photo"]["date"]:
+                dict["Date of avatar"] = datetime.utcfromtimestamp(get_json[0]["crop_photo"]["photo"]["date"]).strftime(
+                    '%Y-%m-%d %H:%M:%S')
+        except:
+            pass
+
+        try:
+            if not len(get_json[0]["university_name"]):
+                pass
+            else:
+                dict["Education"] = {}
+                dict["Education"]["University"] = get_json[0]["university_name"]
         except:
             pass
 
