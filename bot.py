@@ -67,7 +67,7 @@ def get_info(message):
         dict = {}
 
         try:
-            if get_json[0]['id'] is get_json[0]['id']:
+            if get_json[0]['id'] == get_json[0]['id']:
                 dict["ID"] = get_json[0]['id']
         except:
             pass
@@ -167,22 +167,35 @@ def get_info(message):
 
         try:
             if get_json[0]['relation'] == get_json[0]['relation']:
+                dict["Relationship"] = {}
                 if get_json[0]['relation'] == 0:
-                    dict["Relationship"] = "Not specified"
+                    dict["Relationship"]["Relationship"]["Relationship"] = "Not specified"
                 if get_json[0]['relation'] == 1:
-                    dict["Relationship"] = "Single"
+                    dict["Relationship"]["Relationship"] = "Single"
                 if get_json[0]['relation'] == 2:
-                    dict["Relationship"] = "In a relationship"
+                    dict["Relationship"]["Relationship"] = "In a relationship"
                 if get_json[0]['relation'] == 3:
-                    dict["Relationship"] = "Engaged"
+                    dict["Relationship"]["Relationship"] = "Engaged"
                 if get_json[0]['relation'] == 4:
-                    dict["Relationship"] = "Married"
+                    dict["Relationship"]["Relationship"] = "Married"
                 if get_json[0]['relation'] == 5:
-                    dict["Relationship"] = "Complicated"
+                    dict["Relationship"]["Relationship"] = "Complicated"
                 if get_json[0]['relation'] == 6:
-                    dict["Relationship"] = "Searching"
+                    dict["Relationship"]["Relationship"] = "Searching"
                 if get_json[0]['relation'] == 7:
-                    dict["Relationship"] = "In love"
+                    dict["Relationship"]["Relationship"] = "In love"
+
+            if get_json[0]['relation_partner'] == get_json[0]['relation_partner']:
+                dict["Relationship"]["Partner ID"] = "vk.com/id" + str(get_json[0]['relation_partner']['id'])
+
+            if get_json[0]['relation_partner']["first_name"] == get_json[0]['relation_partner']["first_name"]:
+                dict["Relationship"]["Fisrt name"] = get_json[0]['relation_partner']["first_name"]
+
+            if get_json[0]['relation_partner']["last_name"] == get_json[0]['relation_partner']["last_name"]:
+                dict["Relationship"]["Last name"] = get_json[0]['relation_partner']["last_name"]
+
+            if len(dict["Relationship"]) == 0:
+                del dict["Relationship"]
         except:
             pass
 
@@ -314,52 +327,91 @@ def get_info(message):
                 dict["Counters"] = {}
                 try:
                     if get_json[0]["counters"]["albums"] == get_json[0]["counters"]["albums"]:
-                        dict["Counters"]["Albums"] = get_json[0]["counters"]["albums"]
+                        if get_json[0]["counters"]["albums"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["Albums"] = get_json[0]["counters"]["albums"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["counters"]["videos"] == get_json[0]["counters"]["videos"]:
-                        dict["Counters"]["Videos"] = get_json[0]["counters"]["videos"]
+                        if get_json[0]["counters"]["videos"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["Videos"] = get_json[0]["counters"]["videos"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["counters"]["audios"] == get_json[0]["counters"]["audios"]:
-                        dict["Counters"]["Audios"] = get_json[0]["counters"]["audios"]
+                        if get_json[0]["counters"]["audios"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["Audios"] = get_json[0]["counters"]["audios"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["counters"]["notes"] == get_json[0]["counters"]["notes"]:
-                        dict["Counters"]["Notes"] = get_json[0]["counters"]["notes"]
+                        if get_json[0]["counters"]["notes"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["Notes"] = get_json[0]["counters"]["notes"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["counters"]["friends"] == get_json[0]["counters"]["friends"]:
-                        dict["Counters"]["Friends"] = get_json[0]["counters"]["friends"]
+                        if get_json[0]["counters"]["friends"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["Friends"] = get_json[0]["counters"]["friends"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["counters"]["groups"] == get_json[0]["counters"]["groups"]:
-                        dict["Counters"]["Groups"] = get_json[0]["counters"]["groups"]
+                        if get_json[0]["counters"]["groups"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["Groups"] = get_json[0]["counters"]["groups"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["counters"]["user_videos"] == get_json[0]["counters"]["user_videos"]:
-                        dict["Counters"]["User's tagged video"] = get_json[0]["counters"]["user_video"]
+                        if get_json[0]["counters"]["user_videos"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["User's tagged video"] = get_json[0]["counters"]["user_video"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["counters"]["followers"] == get_json[0]["counters"]["followers"]:
-                        dict["Counters"]["Followers"] = get_json[0]["counters"]["followers"]
+                        if get_json[0]["counters"]["followers"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["Followers"] = get_json[0]["counters"]["followers"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["counters"]["user_photos"] == get_json[0]["counters"]["user_photos"]:
-                        dict["Counters"]["User's tagged photos"] = get_json[0]["counters"]["user_photos"]
+                        if get_json[0]["counters"]["user_photos"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["User's tagged photos"] = get_json[0]["counters"]["user_photos"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["counters"]["subscriptions"] == get_json[0]["counters"]["subscriptions"]:
-                        dict["Counters"]["Subscriptions"] = get_json[0]["counters"]["subscriptions"]
+                        if get_json[0]["counters"]["subscriptions"] == 0:
+                            pass
+                        else:
+                            dict["Counters"]["Subscriptions"] = get_json[0]["counters"]["subscriptions"]
                 except:
                     pass
         except:
@@ -390,6 +442,7 @@ def get_info(message):
                             dict["Personal"]["Political"] = "Libertian"
                 except:
                     pass
+
                 try:
                     if get_json[0]["personal"]["langs"] == get_json[0]["personal"]["langs"]:
                         dict["Personal"]["Langs"] = get_json[0]["personal"]["langs"]
@@ -400,11 +453,13 @@ def get_info(message):
                         dict["Personal"]["Religion"] = get_json[0]["personal"]["religion"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["personal"]["inspired_by"] == get_json[0]["personal"]["inspired_by"]:
                         dict["Personal"]["Inspirted by"] = get_json[0]["personal"]["inspired_by"]
                 except:
                     pass
+
                 try:
                     if get_json[0]["personal"]["people_main"] == get_json[0]["personal"]["people_main"]:
                         if get_json[0]["personal"]["people_main"] == 1:
@@ -421,6 +476,7 @@ def get_info(message):
                             dict["Personal"]["People main"] = "Humor and love for life"
                 except:
                     pass
+
                 try:
                     if get_json[0]["personal"]["life_main"] == get_json[0]["personal"]["life_main"]:
                         if get_json[0]["personal"]["life_main"] == 1:
@@ -441,6 +497,7 @@ def get_info(message):
                             dict["Personal"]["Life main"] = "Fame and influence"
                 except:
                     pass
+
                 try:
                     if get_json[0]["personal"]["smoking"] == get_json[0]["personal"]["smoking"]:
                         if get_json[0]["personal"]["smoking"] == 1:
@@ -455,6 +512,7 @@ def get_info(message):
                             dict["Personal"]["Smoking"] = "Positive"
                 except:
                     pass
+
                 try:
                     if get_json[0]["personal"]["alcohol"] == get_json[0]["personal"]["alcohol"]:
                         if get_json[0]["personal"]["alcohol"] == 1:
@@ -469,6 +527,10 @@ def get_info(message):
                             dict["Personal"]["Alcohol"] = "Positive"
                 except:
                     pass
+
+            if len(dict["Personal"]) == 0:
+                del dict["Personal"]
+
         except:
             pass
 
@@ -492,19 +554,19 @@ def get_info(message):
 
         try:
             if get_json[0]["instagram"] == get_json[0]["instagram"]:
-                dict["Instagram"] = "https://www.instagram.com/" + get_json[0]["instagram"]
+                dict["Instagram"] = "instagram.com/" + get_json[0]["instagram"]
         except:
             pass
 
         try:
             if get_json[0]["twitter"] == get_json[0]["twitter"]:
-                dict["Twitter"] = "https://twitter.com/" + get_json[0]["twitter"]
+                dict["Twitter"] = "twitter.com/" + get_json[0]["twitter"]
         except:
             pass
 
         try:
             if get_json[0]["facebook"] == get_json[0]["facebook"]:
-                dict["Facebook"] = "http://facebook.com/profile.php?id=" + get_json[0]["facebook"]
+                dict["Facebook"] = "facebook.com/profile.php?id=" + get_json[0]["facebook"]
             else:
                 pass
         except:
