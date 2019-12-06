@@ -168,8 +168,6 @@ def get_info(message):
         try:
             if get_json[0]['relation'] == get_json[0]['relation']:
                 dict["Relationship"] = {}
-                if get_json[0]['relation'] == 0:
-                    dict["Relationship"]["Relationship"]["Relationship"] = "Not specified"
                 if get_json[0]['relation'] == 1:
                     dict["Relationship"]["Relationship"] = "Single"
                 if get_json[0]['relation'] == 2:
@@ -196,6 +194,32 @@ def get_info(message):
 
             if len(dict["Relationship"]) == 0:
                 del dict["Relationship"]
+        except:
+            pass
+
+        try:
+            if get_json[0]["relatives"] == get_json[0]["relatives"]:
+                dict["Relatives"] = {}
+                relatives = []
+                for item in get_json[0]["relatives"]:
+                    relatives.append(item["type"].capitalize() + ":" + " vk.com/id" + str(item['id']))
+                dict["Relatives"] = relatives
+
+            if len(dict["Relatives"]) == 0:
+                del dict["Relatives"]
+        except:
+            pass
+
+        try:
+            if get_json[0]["schools"] == get_json[0]["schools"]:
+                dict["Schools"] = {}
+                schools = []
+                for item in get_json[0]["schools"]:
+                    schools.append((item["name"]))
+                dict["Schools"] = schools
+
+            if len(dict["Schools"]) == 0:
+                del dict["Schools"]
         except:
             pass
 
