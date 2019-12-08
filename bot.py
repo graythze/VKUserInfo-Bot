@@ -202,7 +202,10 @@ def get_info(message):
                 dict["Relatives"] = {}
                 relatives = []
                 for item in get_json[0]["relatives"]:
-                    relatives.append(item["type"].capitalize() + ":" + " vk.com/id" + str(item['id']))
+                    if item["id"] < 0:
+                        relatives.append(item["type"].capitalize() + ":" + " no link :(")
+                    else:
+                        relatives.append(item["type"].capitalize() + ":" + " vk.com/id" + str(item['id']))
                 dict["Relatives"] = relatives
 
             if len(dict["Relatives"]) == 0:
@@ -589,6 +592,12 @@ def get_info(message):
             pass
 
         try:
+            if get_json[0]["livejournal"] == get_json[0]["livejournal"]:
+                dict["LiveJournal"] = get_json[0]["livejournal"] + ".livejournal.com"
+        except:
+            pass
+
+        try:
             if get_json[0]["facebook"] == get_json[0]["facebook"]:
                 dict["Facebook"] = "facebook.com/profile.php?id=" + get_json[0]["facebook"]
             else:
@@ -644,6 +653,31 @@ def get_info(message):
             else:
                 dict["Education"] = {}
                 dict["Education"]["University"] = get_json[0]["university_name"]
+
+            if not len(get_json[0]["faculty_name"]):
+                pass
+            else:
+                dict["Education"]["Faculty"] = {}
+                dict["Education"]["Faculty"] = get_json[0]["faculty_name"]
+
+            if get_json[0]["graduation"] == get_json[0]["graduation"]:
+                dict["Education"]["Graduation"] = {}
+                dict["Education"]["Graduation"] = get_json[0]["graduation"]
+            else:
+                pass
+
+            if not len(get_json[0]["education_form"]):
+                pass
+            else:
+                dict["Education"]["Form"] = {}
+                dict["Education"]["Form"] = get_json[0]["education_form"]
+
+            if not len(get_json[0]["education_status"]):
+                pass
+            else:
+                dict["Education"]["Status"] = {}
+                dict["Education"]["Status"] = get_json[0]["education_status"]
+
         except:
             pass
 
