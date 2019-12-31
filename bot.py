@@ -562,13 +562,17 @@ def get_info(message):
             pass
 
         try:
-            if get_json[0]["mobile_phone"] == get_json[0]["mobile_phone"]:
+            if len(get_json[0]["mobile_phone"]) == 0:
+                pass
+            else:
                 dict["Mobile"] = get_json[0]["mobile_phone"]
         except:
             pass
 
         try:
-            if get_json[0]["home_phone"] == get_json[0]["home_phone"]:
+            if len(get_json[0]["home_phone"]) == 0:
+                pass
+            else:
                 dict["Home phone"] = get_json[0]["home_phone"]
         except:
             pass
