@@ -26,49 +26,51 @@ def find_at(msg):
 @bot.message_handler(commands=['start'])
 def regular_message(message):
     bot.send_message(message.from_user.id, "<b>Welcome to bot! 🤖</b>\n"
-                                           "\nPlease send ID of user's page below 🔎"
+                                           "\nPlease send the user's ID page 🔎"
                                            '\n(eg. "<b>durov</b>" or "<b>id1</b>")', parse_mode="HTML")
 
 
 @bot.message_handler(commands=['help'])
 def help_message(message):
-    bot.send_message(message.from_user.id, "This bot gets all information (if it's available) from user page. "
-                                           "Just send text message with ID ang get info about it.\n"
-                                           "\n<b>IMPORTANT: All data is taken from public sources by VK API by "
-                                           "users.get method.</b> "
+    bot.send_message(message.from_user.id, "This bot gets all information (if available) from user's page. "
+                                           "Just send a text message with ID to get info about the user.\n"
+                                           "\n<b>DISCLAIMER: All data is taken from public sources by VK API's "
+                                           "users.get Method.</b> "
                                            "\n<b>More at vk.com/dev/users.get</b>", parse_mode="HTML")
 
 
 @bot.message_handler(func=lambda msg: msg.text is not None)
 def get_info(message):
     try:
-        texts = message.text.split()
-        at_text = find_at(texts)
+        got_text = message.text.split()
+        at_text = find_at(got_text)
         get_json = api.users.get(
             fields='photo_id, verified, sex, bdate, city, country, home_town, has_photo,'
-                   'photo_max_orig, online, domain, has_mobile,'
+                   'photo_max_orig, domain, has_mobile, wall_comments,'
                    'contacts, site, education, universities, schools, status, last_seen, followers_count,'
                    'occupation, nickname, relatives, relation, personal, connections, exports, activities, interests, '
                    'music, movies, tv, books, games, about, quotes, can_post, can_see_all_posts, can_see_audio,'
-                   'can_write_private_message, can_send_friend_request, is_favorite, is_hidden_from_feed, timezone,'
+                   'can_write_private_message, can_send_friend_request,'
                    'screen_name, maiden_name, crop_photo, career, military,'
                    'can_be_invited_group, counters',
             user_ids=at_text.lower())
 
-        '''parsing reg date'''
-        link = settings.FOAF_LINK + str(get_json[0]['id'])
-        with urllib.request.urlopen(link) as response:
-            vk_xml = response.read().decode("windows-1251")
+        try:
+            link = settings.FOAF_LINK + str(get_json[0]['id'])
+            with urllib.request.urlopen(link) as response:
+                vk_xml = response.read().decode("windows-1251")
 
-        parsed_xml = re.findall(r'ya:created dc:date="(.*)"', vk_xml)
-        get_json[0].update({"reg_date": parsed_xml})
-        ''' parsing reg date'''
+            parsed_xml = re.findall(r'ya:created dc:date="(.*)"', vk_xml)
+            parsed_xml = datetime.strptime(str(parsed_xml), "['%Y-%m-%dT%H:%M:%S%z']")
+            get_json[0].update({"reg_date": str(parsed_xml)[:19]})
+
+        except:
+            pass
 
         dict = {}
 
         try:
-            if get_json[0]['id'] == get_json[0]['id']:
-                dict["ID"] = get_json[0]['id']
+            dict["— ID"] = get_json[0]['id']
         except:
             pass
 
@@ -76,7 +78,7 @@ def get_info(message):
             if get_json[0]['first_name'] == "":
                 pass
             else:
-                dict["First name"] = get_json[0]['first_name']
+                dict["— First name"] = get_json[0]['first_name']
         except:
             pass
 
@@ -84,145 +86,228 @@ def get_info(message):
             if get_json[0]['last_name'] == "":
                 pass
             else:
-                dict["Last name"] = get_json[0]['last_name']
+                dict["— Last name"] = get_json[0]['last_name']
         except:
             pass
 
         try:
-            if get_json[0]['deactivated'] == get_json[0]['deactivated']:
-                if get_json[0]['deactivated'] == "deleted":
-                    dict["Page status"] = "Deleted"
-                else:
-                    dict["Page status"] = "Blocked"
+            if get_json[0]['nickname'] == "":
+                pass
+            else:
+                dict["— Middle name"] = get_json[0]['nickname']
         except:
             pass
 
         try:
-            if get_json[0]["can_write_private_message"] == get_json[0]["can_write_private_message"]:
-                if get_json[0]["can_write_private_message"] == 0:
-                    dict["PM"] = "Not allowed"
-                else:
-                    dict["PM"] = "Allowed"
+            if get_json[0]['maiden_name'] == "":
+                pass
+            else:
+                dict["— Maiden name"] = get_json[0]['maiden_name']
         except:
             pass
 
         try:
-            if get_json[0]["can_see_all_posts"] == get_json[0]["can_see_all_posts"]:
-                if get_json[0]["can_see_all_posts"] == 0:
-                    dict["See all posts"] = "Not allowed"
-                else:
-                    dict["See all posts"] = "Allowed"
+            if get_json[0]['deactivated'] == "deleted":
+                dict["— Page status"] = "Deleted"
+            else:
+                dict["— Page status"] = "Blocked"
         except:
             pass
 
         try:
-            if get_json[0]["can_post"] == get_json[0]["can_post"]:
-                if get_json[0]["can_post"] == 0:
-                    dict["Posting"] = "Not allowed"
-                else:
-                    dict["Posting"] = "Allowed"
+            if get_json[0]['is_closed'] == "True":
+                dict["— Page status"] = "Closed"
+            else:
+                dict["— Page status"] = "Open"
         except:
             pass
 
         try:
-            if get_json[0]["can_see_audio"] == get_json[0]["can_see_audio"]:
-                if get_json[0]["can_see_audio"] == 0:
-                    dict["Audio"] = "Not allowed"
-                else:
-                    dict["Audio"] = "Allowed"
+            if get_json[0]["can_write_private_message"] == 0:
+                dict["— PM"] = "Not allowed"
+            else:
+                dict["— PM"] = "Allowed"
         except:
             pass
 
         try:
-            if get_json[0]['sex'] == get_json[0]['sex']:
-                if get_json[0]['sex'] == 1:
-                    dict["Sex"] = 'Female'
-                if get_json[0]['sex'] == 2:
-                    dict["Sex"] = 'Male'
-                else:
-                    dict["Sex"] = 'Not specified'
+            if get_json[0]["can_see_all_posts"] == 0:
+                dict["— See all posts"] = "Not allowed"
+            else:
+                dict["— See all posts"] = "Allowed"
         except:
             pass
 
         try:
-            if get_json[0]['verified'] == get_json[0]['verified']:
-                if get_json[0]['verified'] == 1:
-                    dict["Verified"] = "Yes"
-                else:
-                    dict["Verified"] = "No"
+            if get_json[0]["can_post"] == 0:
+                dict["— Posting"] = "Not allowed"
+            else:
+                dict["— Posting"] = "Allowed"
         except:
             pass
 
         try:
-            if get_json[0]['bdate'] == get_json[0]['bdate']:
-                dict["Birth date"] = get_json[0]['bdate']
+            if get_json[0]["can_see_audio"] == 0:
+                dict["— Audio"] = "Not allowed"
+            else:
+                dict["— Audio"] = "Allowed"
         except:
             pass
 
         try:
-            if get_json[0]['photo_max_orig'] == get_json[0]['photo_max_orig']:
-                dict["Cropped avatar"] = get_json[0]['photo_max_orig']
+            if get_json[0]["can_send_friend_request"] == 0:
+                dict["— Friend request"] = "Not allowed"
+            else:
+                dict["— Friend request"] = "Allowed"
         except:
             pass
 
         try:
-            if get_json[0]['relation'] == get_json[0]['relation']:
-                dict["Relationship"] = {}
+            if get_json[0]['wall_comments'] == 1:
+                dict["— Commenting"] = "Allowed"
+            else:
+                dict["— Commenting"] = "Not allowed"
+        except:
+            pass
+
+        try:
+            if get_json[0]['sex'] == 1:
+                dict["— Sex"] = 'Female'
+            elif get_json[0]['sex'] == 2:
+                dict["— Sex"] = 'Male'
+            else:
+                dict["— Sex"] = 'Not specified'
+        except:
+            pass
+
+        try:
+            if get_json[0]['verified'] == 1:
+                dict["— Verified"] = "Yes"
+            else:
+                dict["— Verified"] = "No"
+        except:
+            pass
+
+        try:
+            dict["— Birthday"] = get_json[0]['bdate']
+        except:
+            pass
+
+        try:
+            dict["— Cropped avatar"] = get_json[0]['photo_max_orig']
+        except:
+            pass
+
+        try:
+            if get_json[0]['military'][0]['unit'] == get_json[0]['military'][0]['unit']:
+                dict["— Military"] = {}
+                dict["— Military"]["Unit"] = get_json[0]['military'][0]['unit']
+
+                try:
+                    dict["— Military"]["From"] = get_json[0]['military'][0]['from']
+                except:
+                    pass
+
+                try:
+                    dict["— Military"]["Until"] = get_json[0]['military'][0]['until']
+                except:
+                    pass
+        except:
+            pass
+
+        try:
+            if get_json[0]['relation'] == 0:
+                pass
+            else:
+                dict["— Relationship status"] = {}
                 if get_json[0]['relation'] == 1:
-                    dict["Relationship"]["Relationship"] = "Single"
-                if get_json[0]['relation'] == 2:
-                    dict["Relationship"]["Relationship"] = "In a relationship"
-                if get_json[0]['relation'] == 3:
-                    dict["Relationship"]["Relationship"] = "Engaged"
-                if get_json[0]['relation'] == 4:
-                    dict["Relationship"]["Relationship"] = "Married"
-                if get_json[0]['relation'] == 5:
-                    dict["Relationship"]["Relationship"] = "Complicated"
-                if get_json[0]['relation'] == 6:
-                    dict["Relationship"]["Relationship"] = "Searching"
-                if get_json[0]['relation'] == 7:
-                    dict["Relationship"]["Relationship"] = "In love"
+                    dict["— Relationship status"]["Relationship"] = "Single"
+                elif get_json[0]['relation'] == 2:
+                    dict["— Relationship status"]["Relationship"] = "In a relationship"
+                elif get_json[0]['relation'] == 3:
+                    dict["— Relationship status"]["Relationship"] = "Engaged"
+                elif get_json[0]['relation'] == 4:
+                    dict["— Relationship status"]["Relationship"] = "Married"
+                elif get_json[0]['relation'] == 5:
+                    dict["— Relationship status"]["Relationship"] = "Complicated"
+                elif get_json[0]['relation'] == 6:
+                    dict["— Relationship status"]["Relationship"] = "Searching"
+                elif get_json[0]['relation'] == 7:
+                    dict["— Relationship status"]["Relationship"] = "In love"
+            try:
+                dict["— Relationship status"]["Partner ID"] = "vk.com/id" + str(get_json[0]['relation_partner']['id'])
+            except:
+                pass
 
-            if get_json[0]['relation_partner'] == get_json[0]['relation_partner']:
-                dict["Relationship"]["Partner ID"] = "vk.com/id" + str(get_json[0]['relation_partner']['id'])
+            try:
+                dict["— Relationship status"]["First name"] = get_json[0]['relation_partner']["first_name"]
+            except:
+                pass
 
-            if get_json[0]['relation_partner']["first_name"] == get_json[0]['relation_partner']["first_name"]:
-                dict["Relationship"]["Fisrt name"] = get_json[0]['relation_partner']["first_name"]
-
-            if get_json[0]['relation_partner']["last_name"] == get_json[0]['relation_partner']["last_name"]:
-                dict["Relationship"]["Last name"] = get_json[0]['relation_partner']["last_name"]
-
-            if len(dict["Relationship"]) == 0:
-                del dict["Relationship"]
+            try:
+                dict["— Relationship status"]["Last name"] = get_json[0]['relation_partner']["last_name"]
+            except:
+                pass
         except:
             pass
 
         try:
             if get_json[0]["relatives"] == get_json[0]["relatives"]:
-                dict["Relatives"] = {}
+                dict["— Relatives"] = {}
                 relatives = []
                 for item in get_json[0]["relatives"]:
                     if item["id"] < 0:
                         relatives.append(item["type"].capitalize() + ":" + " no link :(")
                     else:
                         relatives.append(item["type"].capitalize() + ":" + " vk.com/id" + str(item['id']))
-                dict["Relatives"] = relatives
+                dict["— Relatives"] = relatives
 
-            if len(dict["Relatives"]) == 0:
-                del dict["Relatives"]
+            if len(dict["— Relatives"]) == 0:
+                del dict["— Relatives"]
         except:
             pass
 
         try:
             if get_json[0]["schools"] == get_json[0]["schools"]:
-                dict["Schools"] = {}
+                dict["— Schools"] = {}
                 schools = []
                 for item in get_json[0]["schools"]:
                     schools.append((item["name"]))
-                dict["Schools"] = schools
+                dict["— Schools"] = schools
 
-            if len(dict["Schools"]) == 0:
-                del dict["Schools"]
+            if len(dict["— Schools"]) == 0:
+                del dict["— Schools"]
+        except:
+            pass
+
+        try:
+            if get_json[0]['career'] == get_json[0]['career']:
+                dict["— Career"] = {}
+
+            try:
+                dict["— Career"]["ID"] = get_json[0]['career'][0]['group_id']
+            except:
+                pass
+
+            try:
+                dict["— Career"]["Company"] = get_json[0]['career'][0]['company']
+            except:
+                pass
+
+            try:
+                dict["— Career"]["From"] = get_json[0]['career'][0]['from']
+            except:
+                pass
+
+            try:
+                dict["— Career"]["Until"] = get_json[0]['career'][0]['until']
+            except:
+                pass
+
+            try:
+                dict["— Career"]["Position"] = get_json[0]['career'][0]['position']
+            except:
+                pass
         except:
             pass
 
@@ -230,30 +315,36 @@ def get_info(message):
             if get_json[0]['site'] == "":
                 pass
             else:
-                dict["Site"] = get_json[0]["site"]
+                dict["— Website"] = get_json[0]["site"]
         except:
             pass
 
         try:
             if get_json[0]["last_seen"]["time"] == get_json[0]["last_seen"]["time"]:
-                dict["Last seen"] = datetime.utcfromtimestamp(get_json[0]["last_seen"]["time"]).strftime(
+                dict["— Last seen"] = datetime.utcfromtimestamp(get_json[0]["last_seen"]["time"]).strftime(
                     '%Y-%m-%d %H:%M:%S')
+            else:
+                dict["— Last seen"] = "Hidden"
+        except:
+            pass
 
-            if get_json[0]["last_seen"]["platform"] == get_json[0]["last_seen"]["platform"]:
-                if get_json[0]["last_seen"]["platform"] == 1:
-                    dict["Platform"] = "Mobile"
-                if get_json[0]["last_seen"]["platform"] == 2:
-                    dict["Platform"] = "iPhone"
-                if get_json[0]["last_seen"]["platform"] == 3:
-                    dict["Platform"] = "iPad"
-                if get_json[0]["last_seen"]["platform"] == 4:
-                    dict["Platform"] = "Android"
-                if get_json[0]["last_seen"]["platform"] == 5:
-                    dict["Platform"] = "WP"
-                if get_json[0]["last_seen"]["platform"] == 6:
-                    dict["Platform"] = "Windows"
-                if get_json[0]["last_seen"]["platform"] == 7:
-                    dict["Platform"] = "Web"
+        try:
+            if get_json[0]["last_seen"]["platform"] == 1:
+                dict["— Platform"] = "Mobile (m.vk.com)"
+            elif get_json[0]["last_seen"]["platform"] == 2:
+                dict["— Platform"] = "iPhone"
+            elif get_json[0]["last_seen"]["platform"] == 3:
+                dict["— Platform"] = "iPad"
+            elif get_json[0]["last_seen"]["platform"] == 4:
+                dict["— Platform"] = "Android"
+            elif get_json[0]["last_seen"]["platform"] == 5:
+                dict["— Platform"] = "Windows Phone"
+            elif get_json[0]["last_seen"]["platform"] == 6:
+                dict["— Platform"] = "Windows 8"
+            elif get_json[0]["last_seen"]["platform"] == 7:
+                dict["— Platform"] = "Web"
+            else:
+                dict["— Platform"] = "VK Mobile (vk.me/app)"
         except:
             pass
 
@@ -261,19 +352,22 @@ def get_info(message):
             if get_json[0]["status"] == "":
                 pass
             else:
-                dict["Status"] = get_json[0]["status"]
+                dict["— Status"] = get_json[0]["status"]
         except:
             pass
 
         try:
-            if get_json[0]["occupation"] == get_json[0]["occupation"]:
-                dict['Occupation'] = get_json[0]["occupation"]["name"]
+            if get_json[0]["occupation"]["name"] == get_json[0]["occupation"]["name"]:
+                dict['— Occupation'] = {}
+                dict['— Occupation']["Place"] = get_json[0]["occupation"]["name"]
+
+            if get_json[0]["occupation"]["type"] == get_json[0]["occupation"]["type"]:
+                dict['— Occupation']["Type"] = get_json[0]["occupation"]["type"]
         except:
             pass
 
         try:
-            if get_json[0]["screen_name"] == get_json[0]["screen_name"]:
-                dict["Domain"] = get_json[0]["screen_name"]
+            dict["— Domain"] = get_json[0]["screen_name"]
         except:
             pass
 
@@ -281,7 +375,7 @@ def get_info(message):
             if get_json[0]["activities"] == "":
                 pass
             else:
-                dict["Activities"] = get_json[0]["activities"]
+                dict["— Activities"] = get_json[0]["activities"]
         except:
             pass
 
@@ -289,7 +383,7 @@ def get_info(message):
             if get_json[0]["interests"] == "":
                 pass
             else:
-                dict["Interests"] = get_json[0]["interests"]
+                dict["— Interests"] = get_json[0]["interests"]
         except:
             pass
 
@@ -297,7 +391,7 @@ def get_info(message):
             if get_json[0]["music"] == "":
                 pass
             else:
-                dict["Music"] = get_json[0]["music"]
+                dict["— Music"] = get_json[0]["music"]
         except:
             pass
 
@@ -305,7 +399,7 @@ def get_info(message):
             if get_json[0]["movies"] == "":
                 pass
             else:
-                dict["Movies"] = get_json[0]["movies"]
+                dict["— Movies"] = get_json[0]["movies"]
         except:
             pass
 
@@ -313,7 +407,7 @@ def get_info(message):
             if get_json[0]["tv"] == "":
                 pass
             else:
-                dict["TV"] = get_json[0]["tv"]
+                dict["— TV"] = get_json[0]["tv"]
         except:
             pass
 
@@ -321,7 +415,7 @@ def get_info(message):
             if get_json[0]["books"] == "":
                 pass
             else:
-                dict["Books"] = get_json[0]["books"]
+                dict["— Books"] = get_json[0]["books"]
         except:
             pass
 
@@ -329,7 +423,7 @@ def get_info(message):
             if get_json[0]["games"] == "":
                 pass
             else:
-                dict["Games"] = get_json[0]["games"]
+                dict["— Games"] = get_json[0]["games"]
         except:
             pass
 
@@ -337,7 +431,7 @@ def get_info(message):
             if get_json[0]["about"] == "":
                 pass
             else:
-                dict["About"] = get_json[0]["about"]
+                dict["— About"] = get_json[0]["about"]
         except:
             pass
 
@@ -345,100 +439,114 @@ def get_info(message):
             if get_json[0]["quotes"] == "":
                 pass
             else:
-                dict["Quotes"] = get_json[0]["quotes"]
+                dict["— Quotes"] = get_json[0]["quotes"]
         except:
             pass
 
         try:
             if get_json[0]["counters"] == get_json[0]["counters"]:
-                dict["Counters"] = {}
+                dict["— Number of"] = {}
                 try:
-                    if get_json[0]["counters"]["albums"] == get_json[0]["counters"]["albums"]:
-                        if get_json[0]["counters"]["albums"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["Albums"] = get_json[0]["counters"]["albums"]
+                    if get_json[0]["counters"]["albums"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Albums"] = get_json[0]["counters"]["albums"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["counters"]["videos"] == get_json[0]["counters"]["videos"]:
-                        if get_json[0]["counters"]["videos"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["Videos"] = get_json[0]["counters"]["videos"]
+                    if get_json[0]["counters"]["videos"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Videos"] = get_json[0]["counters"]["videos"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["counters"]["audios"] == get_json[0]["counters"]["audios"]:
-                        if get_json[0]["counters"]["audios"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["Audios"] = get_json[0]["counters"]["audios"]
+                    if get_json[0]["counters"]["audios"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Audios"] = get_json[0]["counters"]["audios"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["counters"]["notes"] == get_json[0]["counters"]["notes"]:
-                        if get_json[0]["counters"]["notes"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["Notes"] = get_json[0]["counters"]["notes"]
+                    if get_json[0]["counters"]["audios"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Photos"] = get_json[0]["counters"]["Photos"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["counters"]["friends"] == get_json[0]["counters"]["friends"]:
-                        if get_json[0]["counters"]["friends"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["Friends"] = get_json[0]["counters"]["friends"]
+                    if get_json[0]["counters"]["notes"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Notes"] = get_json[0]["counters"]["notes"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["counters"]["groups"] == get_json[0]["counters"]["groups"]:
-                        if get_json[0]["counters"]["groups"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["Groups"] = get_json[0]["counters"]["groups"]
+                    if get_json[0]["counters"]["friends"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Friends"] = get_json[0]["counters"]["friends"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["counters"]["user_videos"] == get_json[0]["counters"]["user_videos"]:
-                        if get_json[0]["counters"]["user_videos"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["User's tagged video"] = get_json[0]["counters"]["user_video"]
+                    if get_json[0]["counters"]["groups"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Groups"] = get_json[0]["counters"]["groups"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["counters"]["followers"] == get_json[0]["counters"]["followers"]:
-                        if get_json[0]["counters"]["followers"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["Followers"] = get_json[0]["counters"]["followers"]
+                    if get_json[0]["counters"]["gifts"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Gifts"] = get_json[0]["counters"]["gifts"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["counters"]["user_photos"] == get_json[0]["counters"]["user_photos"]:
-                        if get_json[0]["counters"]["user_photos"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["User's tagged photos"] = get_json[0]["counters"]["user_photos"]
+                    if get_json[0]["counters"]["user_videos"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["User's tagged video"] = get_json[0]["counters"]["user_video"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["counters"]["subscriptions"] == get_json[0]["counters"]["subscriptions"]:
-                        if get_json[0]["counters"]["subscriptions"] == 0:
-                            pass
-                        else:
-                            dict["Counters"]["Subscriptions"] = get_json[0]["counters"]["subscriptions"]
+                    if get_json[0]["counters"]["followers"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Followers"] = get_json[0]["counters"]["followers"]
+                except:
+                    pass
+
+                try:
+                    if get_json[0]["counters"]["user_photos"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["User's tagged photos"] = get_json[0]["counters"]["user_photos"]
+                except:
+                    pass
+
+                try:
+                    if get_json[0]["counters"]["subscriptions"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Subscriptions"] = get_json[0]["counters"]["subscriptions"]
+                except:
+                    pass
+
+                try:
+                    if get_json[0]["counters"]["pages"] == 0:
+                        pass
+                    else:
+                        dict["— Number of"]["Pages"] = get_json[0]["counters"]["pages"]
                 except:
                     pass
         except:
@@ -446,117 +554,111 @@ def get_info(message):
 
         try:
             if get_json[0]["personal"] == get_json[0]["personal"]:
-                dict["Personal"] = {}
+                dict["— Personal"] = {}
                 try:
                     if get_json[0]["personal"]["political"] == get_json[0]["personal"]["political"]:
                         if get_json[0]["personal"]["political"] == 1:
-                            dict["Personal"]["Political"] = "Communist"
-                        if get_json[0]["personal"]["political"] == 2:
-                            dict["Personal"]["Political"] = "Socialist"
-                        if get_json[0]["personal"]["political"] == 3:
-                            dict["Personal"]["Political"] = "Moderate"
-                        if get_json[0]["personal"]["political"] == 4:
-                            dict["Personal"]["Political"] = "Liberal"
-                        if get_json[0]["personal"]["political"] == 5:
-                            dict["Personal"]["Political"] = "Conservative"
-                        if get_json[0]["personal"]["political"] == 6:
-                            dict["Personal"]["Political"] = "Monarchist"
-                        if get_json[0]["personal"]["political"] == 7:
-                            dict["Personal"]["Political"] = "Ultraconservative"
-                        if get_json[0]["personal"]["political"] == 8:
-                            dict["Personal"]["Political"] = "Apathetic"
-                        if get_json[0]["personal"]["political"] == 9:
-                            dict["Personal"]["Political"] = "Libertian"
+                            dict["— Personal"]["Political"] = "Communist"
+                        elif get_json[0]["personal"]["political"] == 2:
+                            dict["— Personal"]["Political"] = "Socialist"
+                        elif get_json[0]["personal"]["political"] == 3:
+                            dict["— Personal"]["Political"] = "Moderate"
+                        elif get_json[0]["personal"]["political"] == 4:
+                            dict["— Personal"]["Political"] = "Liberal"
+                        elif get_json[0]["personal"]["political"] == 5:
+                            dict["— Personal"]["Political"] = "Conservative"
+                        elif get_json[0]["personal"]["political"] == 6:
+                            dict["— Personal"]["Political"] = "Monarchist"
+                        elif get_json[0]["personal"]["political"] == 7:
+                            dict["— Personal"]["Political"] = "Ultraconservative"
+                        elif get_json[0]["personal"]["political"] == 8:
+                            dict["— Personal"]["Political"] = "Apathetic"
+                        elif get_json[0]["personal"]["political"] == 9:
+                            dict["— Personal"]["Political"] = "Libertian"
                 except:
                     pass
 
                 try:
-                    if get_json[0]["personal"]["langs"] == get_json[0]["personal"]["langs"]:
-                        dict["Personal"]["Langs"] = get_json[0]["personal"]["langs"]
-                except:
-                    pass
-                try:
-                    if get_json[0]["personal"]["religion"] == get_json[0]["personal"]["religion"]:
-                        dict["Personal"]["Religion"] = get_json[0]["personal"]["religion"]
+                    dict["— Personal"]["Languages"] = get_json[0]["personal"]["langs"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["personal"]["inspired_by"] == get_json[0]["personal"]["inspired_by"]:
-                        dict["Personal"]["Inspirted by"] = get_json[0]["personal"]["inspired_by"]
+                    dict["— Personal"]["Religion"] = get_json[0]["personal"]["religion"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["personal"]["people_main"] == get_json[0]["personal"]["people_main"]:
-                        if get_json[0]["personal"]["people_main"] == 1:
-                            dict["Personal"]["People main"] = "Intellect and creativity"
-                        if get_json[0]["personal"]["people_main"] == 2:
-                            dict["Personal"]["People main"] = "Kindness and honesty"
-                        if get_json[0]["personal"]["people_main"] == 3:
-                            dict["Personal"]["People main"] = "Health and beauty"
-                        if get_json[0]["personal"]["people_main"] == 4:
-                            dict["Personal"]["People main"] = "Wealth and power"
-                        if get_json[0]["personal"]["people_main"] == 5:
-                            dict["Personal"]["People main"] = "Courage and persistance"
-                        if get_json[0]["personal"]["people_main"] == 6:
-                            dict["Personal"]["People main"] = "Humor and love for life"
+                    dict["— Personal"]["Inspired by"] = get_json[0]["personal"]["inspired_by"]
                 except:
                     pass
 
                 try:
-                    if get_json[0]["personal"]["life_main"] == get_json[0]["personal"]["life_main"]:
-                        if get_json[0]["personal"]["life_main"] == 1:
-                            dict["Personal"]["Life main"] = "Family and children"
-                        if get_json[0]["personal"]["life_main"] == 2:
-                            dict["Personal"]["Life main"] = "Career and money"
-                        if get_json[0]["personal"]["life_main"] == 3:
-                            dict["Personal"]["Life main"] = "Entertainment and leisure"
-                        if get_json[0]["personal"]["life_main"] == 4:
-                            dict["Personal"]["Life main"] = "Science and research"
-                        if get_json[0]["personal"]["life_main"] == 5:
-                            dict["Personal"]["Life main"] = "Improving the world"
-                        if get_json[0]["personal"]["life_main"] == 6:
-                            dict["Personal"]["Life main"] = "Personal development"
-                        if get_json[0]["personal"]["life_main"] == 7:
-                            dict["Personal"]["Life main"] = "Beauty and art"
-                        if get_json[0]["personal"]["life_main"] == 8:
-                            dict["Personal"]["Life main"] = "Fame and influence"
+                    if get_json[0]["personal"]["people_main"] == 1:
+                        dict["— Personal"]["People main"] = "Intellect and creativity"
+                    elif get_json[0]["personal"]["people_main"] == 2:
+                        dict["— Personal"]["People main"] = "Kindness and honesty"
+                    elif get_json[0]["personal"]["people_main"] == 3:
+                        dict["— Personal"]["People main"] = "Health and beauty"
+                    elif get_json[0]["personal"]["people_main"] == 4:
+                        dict["— Personal"]["People main"] = "Wealth and power"
+                    elif get_json[0]["personal"]["people_main"] == 5:
+                        dict["— Personal"]["People main"] = "Courage and persistance"
+                    elif get_json[0]["personal"]["people_main"] == 6:
+                        dict["— Personal"]["People main"] = "Humor and love for life"
                 except:
                     pass
 
                 try:
-                    if get_json[0]["personal"]["smoking"] == get_json[0]["personal"]["smoking"]:
-                        if get_json[0]["personal"]["smoking"] == 1:
-                            dict["Personal"]["Smoking"] = "Very negative"
-                        if get_json[0]["personal"]["smoking"] == 2:
-                            dict["Personal"]["Smoking"] = "Negative"
-                        if get_json[0]["personal"]["smoking"] == 3:
-                            dict["Personal"]["Smoking"] = "Neutral"
-                        if get_json[0]["personal"]["smoking"] == 4:
-                            dict["Personal"]["Smoking"] = "Compromisable"
-                        if get_json[0]["personal"]["smoking"] == 5:
-                            dict["Personal"]["Smoking"] = "Positive"
+                    if get_json[0]["personal"]["life_main"] == 1:
+                        dict["— Personal"]["Life main"] = "Family and children"
+                    elif get_json[0]["personal"]["life_main"] == 2:
+                        dict["— Personal"]["Life main"] = "Career and money"
+                    elif get_json[0]["personal"]["life_main"] == 3:
+                        dict["— Personal"]["Life main"] = "Entertainment and leisure"
+                    elif get_json[0]["personal"]["life_main"] == 4:
+                        dict["— Personal"]["Life main"] = "Science and research"
+                    elif get_json[0]["personal"]["life_main"] == 5:
+                        dict["— Personal"]["Life main"] = "Improving the world"
+                    elif get_json[0]["personal"]["life_main"] == 6:
+                        dict["— Personal"]["Life main"] = "Personal development"
+                    elif get_json[0]["personal"]["life_main"] == 7:
+                        dict["— Personal"]["Life main"] = "Beauty and art"
+                    elif get_json[0]["personal"]["life_main"] == 8:
+                        dict["— Personal"]["Life main"] = "Fame and influence"
                 except:
                     pass
 
                 try:
-                    if get_json[0]["personal"]["alcohol"] == get_json[0]["personal"]["alcohol"]:
-                        if get_json[0]["personal"]["alcohol"] == 1:
-                            dict["Personal"]["Alcohol"] = "Very negative"
-                        if get_json[0]["personal"]["alcohol"] == 2:
-                            dict["Personal"]["Alcohol"] = "Negative"
-                        if get_json[0]["personal"]["alcohol"] == 3:
-                            dict["Personal"]["Alcohol"] = "Neutral"
-                        if get_json[0]["personal"]["alcohol"] == 4:
-                            dict["Personal"]["Alcohol"] = "Compromisable"
-                        if get_json[0]["personal"]["alcohol"] == 5:
-                            dict["Personal"]["Alcohol"] = "Positive"
+                    if get_json[0]["personal"]["smoking"] == 1:
+                        dict["— Personal"]["Smoking"] = "Very negative"
+                    elif get_json[0]["personal"]["smoking"] == 2:
+                        dict["— Personal"]["Smoking"] = "Negative"
+                    elif get_json[0]["personal"]["smoking"] == 3:
+                        dict["— Personal"]["Smoking"] = "Neutral"
+                    elif get_json[0]["personal"]["smoking"] == 4:
+                        dict["— Personal"]["Smoking"] = "Compromisable"
+                    elif get_json[0]["personal"]["smoking"] == 5:
+                        dict["— Personal"]["Smoking"] = "Positive"
                 except:
                     pass
 
-            if len(dict["Personal"]) == 0:
-                del dict["Personal"]
+                try:
+                    if get_json[0]["personal"]["alcohol"] == 1:
+                        dict["— Personal"]["Alcohol"] = "Very negative"
+                    elif get_json[0]["personal"]["alcohol"] == 2:
+                        dict["— Personal"]["Alcohol"] = "Negative"
+                    elif get_json[0]["personal"]["alcohol"] == 3:
+                        dict["— Personal"]["Alcohol"] = "Neutral"
+                    elif get_json[0]["personal"]["alcohol"] == 4:
+                        dict["— Personal"]["Alcohol"] = "Compromisable"
+                    elif get_json[0]["personal"]["alcohol"] == 5:
+                        dict["— Personal"]["Alcohol"] = "Positive"
+                except:
+                    pass
+
+            if len(dict["— Personal"]) == 0:
+                del dict["— Personal"]
 
         except:
             pass
@@ -565,7 +667,7 @@ def get_info(message):
             if len(get_json[0]["mobile_phone"]) == 0:
                 pass
             else:
-                dict["Mobile"] = get_json[0]["mobile_phone"]
+                dict["— Mobile"] = get_json[0]["mobile_phone"]
         except:
             pass
 
@@ -573,51 +675,42 @@ def get_info(message):
             if len(get_json[0]["home_phone"]) == 0:
                 pass
             else:
-                dict["Home phone"] = get_json[0]["home_phone"]
+                dict["— Home phone"] = get_json[0]["home_phone"]
         except:
             pass
 
         try:
-            if get_json[0]["skype"] == get_json[0]["skype"]:
-                dict["Skype"] = get_json[0]["skype"]
+            dict["— Skype"] = get_json[0]["skype"]
         except:
             pass
 
         try:
-            if get_json[0]["instagram"] == get_json[0]["instagram"]:
-                dict["Instagram"] = "instagram.com/" + get_json[0]["instagram"]
+            dict["— Instagram"] = "instagram.com/" + get_json[0]["instagram"]
         except:
             pass
 
         try:
-            if get_json[0]["twitter"] == get_json[0]["twitter"]:
-                dict["Twitter"] = "twitter.com/" + get_json[0]["twitter"]
+            dict["— Twitter"] = "twitter.com/" + get_json[0]["twitter"]
         except:
             pass
 
         try:
-            if get_json[0]["livejournal"] == get_json[0]["livejournal"]:
-                dict["LiveJournal"] = get_json[0]["livejournal"] + ".livejournal.com"
+            dict["— LiveJournal"] = get_json[0]["livejournal"] + ".livejournal.com"
         except:
             pass
 
         try:
-            if get_json[0]["facebook"] == get_json[0]["facebook"]:
-                dict["Facebook"] = "facebook.com/profile.php?id=" + get_json[0]["facebook"]
-            else:
-                pass
+            dict["— Facebook"] = "facebook.com/profile.php?id=" + get_json[0]["facebook"]
         except:
             pass
 
         try:
-            if get_json[0]["country"]["title"] == get_json[0]["country"]["title"]:
-                dict["Country"] = get_json[0]["country"]["title"]
+            dict["— Country"] = get_json[0]["country"]["title"]
         except:
             pass
 
         try:
-            if get_json[0]["city"]["title"] == get_json[0]["city"]["title"]:
-                dict["City"] = get_json[0]["city"]["title"]
+            dict["— City"] = get_json[0]["city"]["title"]
         except:
             pass
 
@@ -625,7 +718,7 @@ def get_info(message):
             if get_json[0]["home_town"] == "":
                 pass
             else:
-                dict["Hometown"] = get_json[0]["home_town"]
+                dict["— Hometown"] = get_json[0]["home_town"]
         except:
             pass
 
@@ -633,21 +726,21 @@ def get_info(message):
             if len(get_json[0]["reg_date"]) == 0:
                 pass
             else:
-                dict["Registered"] = get_json[0]["reg_date"]
+                dict["— Registered"] = get_json[0]["reg_date"]
         except:
             pass
 
         try:
             full_size_ava = max(get_json[0]["crop_photo"]["photo"]['sizes'],
                                 key=lambda line: int(line['width']))
-            dict["Full-size avatar"] = full_size_ava['url']
+            dict["— Full-size avatar"] = full_size_ava['url']
         except:
             pass
 
         try:
-            if get_json[0]["crop_photo"]["photo"]["date"] == get_json[0]["crop_photo"]["photo"]["date"]:
-                dict["Date of avatar"] = datetime.utcfromtimestamp(get_json[0]["crop_photo"]["photo"]["date"]).strftime(
-                    '%Y-%m-%d %H:%M:%S')
+            dict["— Date of avatar"] = datetime.utcfromtimestamp(
+                get_json[0]["crop_photo"]["photo"]["date"]).strftime(
+                '%Y-%m-%d %H:%M:%S')
         except:
             pass
 
@@ -655,42 +748,40 @@ def get_info(message):
             if not len(get_json[0]["university_name"]):
                 pass
             else:
-                dict["Education"] = {}
-                dict["Education"]["University"] = get_json[0]["university_name"]
+                dict["— Education"] = {}
+                dict["— Education"]["University"] = get_json[0]["university_name"]
 
             if not len(get_json[0]["faculty_name"]):
                 pass
             else:
-                dict["Education"]["Faculty"] = {}
-                dict["Education"]["Faculty"] = get_json[0]["faculty_name"]
+                dict["— Education"]["Faculty"] = {}
+                dict["— Education"]["Faculty"] = get_json[0]["faculty_name"]
 
             if get_json[0]["graduation"] == get_json[0]["graduation"]:
-                dict["Education"]["Graduation"] = {}
-                dict["Education"]["Graduation"] = get_json[0]["graduation"]
+                dict["— Education"]["Graduation"] = {}
+                dict["— Education"]["Graduation"] = get_json[0]["graduation"]
             else:
                 pass
 
             if not len(get_json[0]["education_form"]):
                 pass
             else:
-                dict["Education"]["Form"] = {}
-                dict["Education"]["Form"] = get_json[0]["education_form"]
+                dict["— Education"]["Form"] = {}
+                dict["— Education"]["Form"] = get_json[0]["education_form"]
 
             if not len(get_json[0]["education_status"]):
                 pass
             else:
-                dict["Education"]["Status"] = {}
-                dict["Education"]["Status"] = get_json[0]["education_status"]
+                dict["— Education"]["Status"] = {}
+                dict["— Education"]["Status"] = get_json[0]["education_status"]
 
         except:
             pass
 
-        dict = json.dumps(dict, indent=2, ensure_ascii=False)
+        dict = json.dumps(dict, indent=1, ensure_ascii=False)
 
-        ''' replacing block '''
         for i in settings.TO_REMOVE:
             dict = dict.replace(i, '')
-        ''' replacing block '''
 
         ready_text = util.split_string(dict, 4096)
 
@@ -703,10 +794,10 @@ def get_info(message):
 
 
     except:
-        bot.send_message(message.from_user.id, "<b>⚠️ Something gone wrong ;( There are some reasons:</b>\n"
+        bot.send_message(message.from_user.id, "<b>⚠️ Something went wrong ;( This could be why:</b>\n"
                                                "1. Wrong user ID\n"
-                                               "2. You typed ID with non-Latin text\n"
-                                               "3. Non-usable signs, eg., comma or tilde\n", parse_mode="HTML")
+                                               "2. ID contains non Latin characters\n"
+                                               "3. ID contains special characters (e.g. comma, tilde)\n", parse_mode="HTML")
 
 
 while True:
