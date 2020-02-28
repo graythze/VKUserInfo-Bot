@@ -828,8 +828,7 @@ def get_info(message):
             if len(parsed_xml) == 0:
                 pass
             else:
-                reg_date = str(datetime.strptime(parsed_xml, "['%Y-%m-%dT%H:%M:%S%z']"))
-                data["— Registered"] = reg_date[:19]
+                data["— Registered"] = parsed_xml[2:-8].replace('T', " ")
         except:
             pass
 
