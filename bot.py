@@ -23,6 +23,18 @@ def find_at(msg):
             return text
 
 
+def get_country_str(*country):
+    country_str = api.database.getCountriesById(
+        country_ids=country)
+    return country_str
+
+
+def get_city_str(*city):
+    city_str = api.database.getCitiesById(
+        city_ids=city)
+    return city_str
+
+
 @bot.message_handler(commands=['start'])
 def regular_message(message):
     bot.send_message(message.from_user.id, "<b>Welcome to bot! 🤖</b>\n"
@@ -43,7 +55,12 @@ def help_message(message):
 def get_info(message):
     try:
         got_text = message.text.split()
-        at_text = find_at(got_text)
+        at_text = find_at(got_text).lower()
+        if len(re.findall(r'com/(.*)', at_text)) == 0:
+            pass
+        else:
+            at_text = str(re.findall(r'com/(.*)', at_text))[2:-2]
+
         get_json = api.users.get(
             fields='photo_id, verified, sex, bdate, city, country, home_town, has_photo,'
                    'photo_max_orig, domain, has_mobile, wall_comments,'
@@ -53,7 +70,7 @@ def get_info(message):
                    'can_write_private_message, can_send_friend_request,'
                    'screen_name, maiden_name, crop_photo, career, military,'
                    'can_be_invited_group, counters',
-            user_ids=at_text.lower())
+            user_ids=at_text)
 
         data = {}
 
@@ -195,26 +212,26 @@ def get_info(message):
                 data['— Military'] = {}
                 while i <= units:
                     try:
-                        if get_json[0]["military"][i]['unit'] == get_json[0]["military"][i]['unit']:
-                            data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']] = {}
+                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']] = {}
                     except:
                         pass
 
                     try:
-                        if get_json[0]["military"][i]['from'] == get_json[0]["military"][i]['from']:
-                            data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['From'] = get_json[0]["military"][i]['from']
+                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Country'] = \
+                        get_country_str(get_json[0]["military"][i]['country_id'])[0]['title']
+                        time.sleep(0.60)
                     except:
                         pass
 
                     try:
-                        if get_json[0]["military"][i]['from'] == get_json[0]["military"][i]['from']:
-                            data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['From'] = get_json[0]["military"][i]['from']
+                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['From'] = \
+                            get_json[0]["military"][i]['from']
                     except:
                         pass
 
                     try:
-                        if get_json[0]["military"][i]['until'] == get_json[0]["military"][i]['until']:
-                            data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Until'] = get_json[0]["military"][i]['until']
+                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Until'] = \
+                            get_json[0]["military"][i]['until']
                     except:
                         pass
                     i = i + 1
@@ -282,58 +299,58 @@ def get_info(message):
                 data['— Schools'] = {}
                 while i <= schools:
                     try:
-                        if get_json[0]['schools'][i]['name'] == get_json[0]['schools'][i]['name']:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']] = {}
-                        else:
-                            pass
+                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']] = {}
                     except:
                         pass
 
                     try:
-                        if get_json[0]['schools'][i]['year_from'] == get_json[0]['schools'][i]['year_from']:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['From'] = get_json[0]['schools'][i]['year_from']
-                        else:
-                            pass
+                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Country'] = \
+                            get_country_str(get_json[0]['schools'][i]['country'])[0]['title']
+                        time.sleep(0.60)
                     except:
                         pass
 
                     try:
-                        if get_json[0]['schools'][i]['year_to'] == get_json[0]['schools'][i]['year_to']:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['To'] = get_json[0]['schools'][i]['year_to']
-                        else:
-                            pass
+                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['City'] = \
+                            get_city_str(get_json[0]['schools'][i]['city'])[0]['title']
+                        time.sleep(0.60)
                     except:
                         pass
 
                     try:
-                        if get_json[0]['schools'][i]['year_graduated'] == get_json[0]['schools'][i]['year_graduated']:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Graduated'] = get_json[0]['schools'][i]['year_graduated']
-                        else:
-                            pass
+                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['From'] = \
+                            get_json[0]['schools'][i]['year_from']
                     except:
                         pass
 
                     try:
-                        if get_json[0]['schools'][i]['class'] == "":
-                            pass
-                        else:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Class'] = get_json[0]['schools'][i]['class']
+                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['To'] = \
+                            get_json[0]['schools'][i]['year_to']
                     except:
                         pass
 
                     try:
-                        if get_json[0]['schools'][i]['speciality'] == get_json[0]['schools'][i]['speciality']:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Speciality'] = get_json[0]['schools'][i]['speciality']
-                        else:
-                            pass
+                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Graduated'] = \
+                            get_json[0]['schools'][i]['year_graduated']
                     except:
                         pass
 
                     try:
-                        if get_json[0]['schools'][i]['type_str'] == get_json[0]['schools'][i]['type_str']:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Type'] = get_json[0]['schools'][i]['type_str']
-                        else:
-                            pass
+
+                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Class'] = \
+                            get_json[0]['schools'][i]['class']
+                    except:
+                        pass
+
+                    try:
+                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Speciality'] = \
+                            get_json[0]['schools'][i]['speciality']
+                    except:
+                        pass
+
+                    try:
+                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Type'] = \
+                            get_json[0]['schools'][i]['type_str']
                     except:
                         pass
                     i = i + 1
@@ -350,49 +367,84 @@ def get_info(message):
                 while i <= jobs:
                     try:
                         try:
-                            if get_json[0]["career"][i]['group_id'] == get_json[0]["career"][i]['group_id']:
-                                data["— Career"]['#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])] = {}
+                            data["— Career"]['#' + str(i + 1) + ', ' + 'vk.com/public' + str(
+                                get_json[0]["career"][i]['group_id'])] = {}
                         except:
                             pass
 
                         try:
-                            if get_json[0]["career"][i]['company'] == get_json[0]["career"][i]['company']:
-                                data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])] = {}
+                            data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])] = {}
                         except:
                             pass
 
                         try:
-                            if get_json[0]["career"][i]['from'] == get_json[0]["career"][i]['from']:
-                                data["— Career"]['#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])]['From'] = get_json[0]["career"][i]['from']
-                        except:
-                            pass
-                        try:
-                            if get_json[0]["career"][i]['from'] == get_json[0]["career"][i]['from']:
-                                data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])]['From'] = get_json[0]["career"][i]['from']
+                            data["— Career"][
+                                '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
+                                'Country'] = get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
+                            time.sleep(0.60)
                         except:
                             pass
 
                         try:
-                            if get_json[0]["career"][i]['until'] == get_json[0]["career"][i]['until']:
-                                data["— Career"]['#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])]['To'] = get_json[0]["career"][i]['until']
+                            data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
+                                'Country'] = \
+                                get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
+                            time.sleep(0.60)
                         except:
                             pass
 
                         try:
-                            if get_json[0]["career"][i]['until'] == get_json[0]["career"][i]['until']:
-                                data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])]['To'] = get_json[0]["career"][i]['until']
+                            data["— Career"][
+                                '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
+                                'City'] = get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
+                            time.sleep(0.60)
                         except:
                             pass
 
                         try:
-                            if get_json[0]["career"][i]['position'] == get_json[0]["career"][i]['position']:
-                                data["— Career"]['#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])]['Position'] = get_json[0]["career"][i]['position']
+                            data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
+                                'City'] = \
+                                get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
+                            time.sleep(0.60)
                         except:
                             pass
 
                         try:
-                            if get_json[0]["career"][i]['position'] == get_json[0]["career"][i]['position']:
-                                data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])]['Position'] = get_json[0]["career"][i]['position']
+                            data["— Career"][
+                                '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
+                                'From'] = get_json[0]["career"][i]['from']
+                        except:
+                            pass
+
+                        try:
+                            data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
+                                'From'] = get_json[0]["career"][i]['from']
+                        except:
+                            pass
+
+                        try:
+                            data["— Career"][
+                                '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
+                                'To'] = get_json[0]["career"][i]['until']
+                        except:
+                            pass
+
+                        try:
+                            data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])]['To'] = \
+                            get_json[0]["career"][i]['until']
+                        except:
+                            pass
+
+                        try:
+                            data["— Career"][
+                                '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
+                                'Position'] = get_json[0]["career"][i]['position']
+                        except:
+                            pass
+
+                        try:
+                            data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
+                                'Position'] = get_json[0]["career"][i]['position']
                         except:
                             pass
                     except:
@@ -411,7 +463,8 @@ def get_info(message):
 
         try:
             if get_json[0]["last_seen"]["time"] == get_json[0]["last_seen"]["time"]:
-                data["— Last seen"] = datetime.utcfromtimestamp(get_json[0]["last_seen"]["time"]).strftime('%Y-%m-%d %H:%M:%S')
+                data["— Last seen"] = datetime.utcfromtimestamp(get_json[0]["last_seen"]["time"]).strftime(
+                    '%Y-%m-%d %H:%M:%S')
             else:
                 data["— Last seen"] = "Hidden"
         except:
@@ -431,7 +484,7 @@ def get_info(message):
             elif get_json[0]["last_seen"]["platform"] == 6:
                 data["— Platform"] = "Windows 8"
             elif get_json[0]["last_seen"]["platform"] == 7:
-                data["— Platform"] = "Web"
+                data["— Platform"] = "Web (vk.com)"
             else:
                 data["— Platform"] = "VK Me (vk.me/app)"
         except:
@@ -825,10 +878,10 @@ def get_info(message):
             with urllib.request.urlopen(link) as response:
                 vk_xml = response.read().decode("windows-1251")
             parsed_xml = str(re.findall(r'ya:created dc:date="(.*)"', vk_xml))
-            if len(parsed_xml) == 0:
-                pass
-            else:
+            if len(parsed_xml) > 2:
                 data["— Registered"] = parsed_xml[2:-8].replace('T', " ")
+            else:
+                pass
         except:
             pass
 
@@ -855,43 +908,51 @@ def get_info(message):
                 data["— Education"] = {}
                 while i <= unis:
                     try:
-                        if get_json[0]["universities"][i]['name'] == get_json[0]["universities"][i]['name']:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])] = {}
+                        data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])] = {}
                     except:
                         pass
 
                     try:
-                        if get_json[0]["universities"][i]['faculty_name'] == get_json[0]["universities"][i]['faculty_name']:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Faculty"] = {}
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Faculty"] = get_json[0]["universities"][i]['faculty_name']
+                        data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
+                            "Country"] = get_country_str(get_json[0]["universities"][i]['country'])[0]['title']
+                        time.sleep(0.60)
                     except:
                         pass
 
                     try:
-                        if get_json[0]["universities"][i]['chair_name'] == get_json[0]["universities"][i]['chair_name']:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Study program"] = {}
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Study program"] = get_json[0]["universities"][i]['chair_name']
+                        data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
+                            "City"] = get_city_str(get_json[0]["universities"][i]['city'])[0]['title']
+                        time.sleep(0.60)
                     except:
                         pass
 
                     try:
-                        if get_json[0]["universities"][i]['graduation'] == get_json[0]["universities"][i]['graduation']:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Graduation"] = {}
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Graduation"] = get_json[0]["universities"][i]['graduation']
+                        data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
+                            "Faculty"] = get_json[0]["universities"][i]['faculty_name']
                     except:
                         pass
 
                     try:
-                        if get_json[0]["universities"][i]['education_form'] == get_json[0]["universities"][i]['education_form']:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Graduation form"] = {}
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Graduation form"] = get_json[0]["universities"][i]['education_form']
+                        data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
+                            "Study program"] = get_json[0]["universities"][i]['chair_name']
                     except:
                         pass
 
                     try:
-                        if get_json[0]["universities"][i]['education_status'] == get_json[0]["universities"][i]['education_status']:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Education status"] = {}
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])]["Education status"] = get_json[0]["universities"][i]['education_status']
+                        data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
+                            "Graduation"] = get_json[0]["universities"][i]['graduation']
+                    except:
+                        pass
+
+                    try:
+                        data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
+                            "Form"] = get_json[0]["universities"][i]['education_form']
+                    except:
+                        pass
+
+                    try:
+                        data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
+                            "Status"] = get_json[0]["universities"][i]['education_status']
                     except:
                         pass
                     i = i + 1
@@ -920,11 +981,12 @@ def get_info(message):
         ready_text = util.split_string(result, 4096)
 
         bot.send_message(message.from_user.id,
-                         "⌛ Requested info for " + at_text.lower() + " on " + str(
+                         "⌛ Requested info for " + at_text + " on " + str(
                              datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")) + " UTC")
 
         for text in ready_text:
             bot.send_message(message.from_user.id, text)
+
 
     except:
         bot.send_message(message.from_user.id, "<b>⚠️ Something went wrong ;( This could be why:</b>\n"
