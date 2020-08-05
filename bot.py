@@ -199,7 +199,7 @@ def get_info(message):
             pass
 
         try:
-            data["— Cropped avatar"] = get_json[0]['photo_max_orig']
+            data["— Cropped avatar"] = get_json[0]['photo_max_orig'].replace("&ava=1", "")
         except:
             pass
 
@@ -485,10 +485,11 @@ def get_info(message):
                 data["— Platform"] = "Windows 8"
             elif get_json[0]["last_seen"]["platform"] == 7:
                 data["— Platform"] = "Web (vk.com)"
+        except:
+            if "deactivated" in get_json[0]:
+                pass
             else:
                 data["— Platform"] = "VK Me (vk.me/app)"
-        except:
-            pass
 
         try:
             if get_json[0]["status"] == "":
