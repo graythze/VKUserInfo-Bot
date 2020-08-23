@@ -137,9 +137,9 @@ def get_info(message):
 
         try:
             if get_json[0]["can_see_all_posts"] == 0:
-                data["— See all posts"] = "Not allowed"
+                data["— All posts"] = "Hidden"
             else:
-                data["— See all posts"] = "Allowed"
+                data["— All posts"] = "Visible"
         except:
             pass
 
@@ -153,9 +153,9 @@ def get_info(message):
 
         try:
             if get_json[0]["can_see_audio"] == 0:
-                data["— Audio"] = "Not allowed"
+                data["— Audio"] = "Hidden"
             else:
-                data["— Audio"] = "Allowed"
+                data["— Audio"] = "Visible"
         except:
             pass
 
@@ -164,14 +164,6 @@ def get_info(message):
                 data["— Friend request"] = "Not allowed"
             else:
                 data["— Friend request"] = "Allowed"
-        except:
-            pass
-
-        try:
-            if get_json[0]['wall_comments'] == 1:
-                data["— Commenting"] = "Allowed"
-            else:
-                data["— Commenting"] = "Not allowed"
         except:
             pass
 
@@ -199,7 +191,7 @@ def get_info(message):
             pass
 
         try:
-            data["— Cropped avatar"] = get_json[0]['photo_max_orig'].replace("&ava=1", "")
+            data["— Cropped avatar"] = get_json[0]['photo_max_orig']
         except:
             pass
 
@@ -219,7 +211,7 @@ def get_info(message):
                     try:
                         data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Country'] = \
                         get_country_str(get_json[0]["military"][i]['country_id'])[0]['title']
-                        time.sleep(0.60)
+                        time.sleep(0.35)
                     except:
                         pass
 
@@ -242,33 +234,33 @@ def get_info(message):
             if get_json[0]['relation'] == 0:
                 pass
             else:
-                data["— Relationship status"] = {}
+                data["— Relationship"] = {}
                 if get_json[0]['relation'] == 1:
-                    data["— Relationship status"]["Relationship"] = "Single"
+                    data["— Relationship"]["Status"] = "Single"
                 elif get_json[0]['relation'] == 2:
-                    data["— Relationship status"]["Relationship"] = "In a relationship"
+                    data["— Relationship"]["Status"] = "In a relationship"
                 elif get_json[0]['relation'] == 3:
-                    data["— Relationship status"]["Relationship"] = "Engaged"
+                    data["— Relationship"]["Status"] = "Engaged"
                 elif get_json[0]['relation'] == 4:
-                    data["— Relationship status"]["Relationship"] = "Married"
+                    data["— Relationship"]["Status"] = "Married"
                 elif get_json[0]['relation'] == 5:
-                    data["— Relationship status"]["Relationship"] = "Complicated"
+                    data["— Relationship"]["Status"] = "Complicated"
                 elif get_json[0]['relation'] == 6:
-                    data["— Relationship status"]["Relationship"] = "Searching"
+                    data["— Relationship"]["Status"] = "Searching"
                 elif get_json[0]['relation'] == 7:
-                    data["— Relationship status"]["Relationship"] = "In love"
+                    data["— Relationship"]["Status"] = "In love"
             try:
-                data["— Relationship status"]["Partner ID"] = "vk.com/id" + str(get_json[0]['relation_partner']['id'])
+                data["— Relationship"]["Partner ID"] = "vk.com/id" + str(get_json[0]['relation_partner']['id'])
             except:
                 pass
 
             try:
-                data["— Relationship status"]["First name"] = get_json[0]['relation_partner']["first_name"]
+                data["— Relationship"]["First name"] = get_json[0]['relation_partner']["first_name"]
             except:
                 pass
 
             try:
-                data["— Relationship status"]["Last name"] = get_json[0]['relation_partner']["last_name"]
+                data["— Relationship"]["Last name"] = get_json[0]['relation_partner']["last_name"]
             except:
                 pass
         except:
@@ -280,7 +272,7 @@ def get_info(message):
                 relatives = []
                 for item in get_json[0]["relatives"]:
                     if item["id"] < 0:
-                        relatives.append(item["type"].capitalize() + ":" + " no link :(")
+                        relatives.append(item["type"].capitalize() + ":" + " no link")
                     else:
                         relatives.append(item["type"].capitalize() + ":" + " vk.com/id" + str(item['id']))
                 data["— Relatives"] = relatives
@@ -306,14 +298,14 @@ def get_info(message):
                     try:
                         data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Country'] = \
                             get_country_str(get_json[0]['schools'][i]['country'])[0]['title']
-                        time.sleep(0.60)
+                        time.sleep(0.35)
                     except:
                         pass
 
                     try:
                         data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['City'] = \
                             get_city_str(get_json[0]['schools'][i]['city'])[0]['title']
-                        time.sleep(0.60)
+                        time.sleep(0.35)
                     except:
                         pass
 
@@ -381,7 +373,7 @@ def get_info(message):
                             data["— Career"][
                                 '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
                                 'Country'] = get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
-                            time.sleep(0.60)
+                            time.sleep(0.35)
                         except:
                             pass
 
@@ -389,7 +381,7 @@ def get_info(message):
                             data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
                                 'Country'] = \
                                 get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
-                            time.sleep(0.60)
+                            time.sleep(0.35)
                         except:
                             pass
 
@@ -397,7 +389,7 @@ def get_info(message):
                             data["— Career"][
                                 '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
                                 'City'] = get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
-                            time.sleep(0.60)
+                            time.sleep(0.35)
                         except:
                             pass
 
@@ -405,7 +397,7 @@ def get_info(message):
                             data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
                                 'City'] = \
                                 get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
-                            time.sleep(0.60)
+                            time.sleep(0.35)
                         except:
                             pass
 
@@ -472,7 +464,7 @@ def get_info(message):
 
         try:
             if get_json[0]["last_seen"]["platform"] == 1:
-                data["— Platform"] = "Mobile (m.vk.com)"
+                data["— Platform"] = "m.vk.com"
             elif get_json[0]["last_seen"]["platform"] == 2:
                 data["— Platform"] = "iPhone"
             elif get_json[0]["last_seen"]["platform"] == 3:
@@ -484,7 +476,7 @@ def get_info(message):
             elif get_json[0]["last_seen"]["platform"] == 6:
                 data["— Platform"] = "Windows 8"
             elif get_json[0]["last_seen"]["platform"] == 7:
-                data["— Platform"] = "Web (vk.com)"
+                data["— Platform"] = "vk.com"
         except:
             if "deactivated" in get_json[0]:
                 pass
@@ -503,7 +495,6 @@ def get_info(message):
             if get_json[0]["occupation"]["name"] == get_json[0]["occupation"]["name"]:
                 data['— Occupation'] = {}
                 data['— Occupation']["Place"] = get_json[0]["occupation"]["name"]
-
             if get_json[0]["occupation"]["type"] == get_json[0]["occupation"]["type"]:
                 data['— Occupation']["Type"] = get_json[0]["occupation"]["type"]
         except:
@@ -700,6 +691,9 @@ def get_info(message):
                         data["— Number of"]["Pages"] = get_json[0]["counters"]["pages"]
                 except:
                     pass
+
+            if len(data["— Number of"]) == 0:
+                del data["— Number of"]
         except:
             pass
 
@@ -916,14 +910,14 @@ def get_info(message):
                     try:
                         data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
                             "Country"] = get_country_str(get_json[0]["universities"][i]['country'])[0]['title']
-                        time.sleep(0.60)
+                        time.sleep(0.35)
                     except:
                         pass
 
                     try:
                         data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
                             "City"] = get_city_str(get_json[0]["universities"][i]['city'])[0]['title']
-                        time.sleep(0.60)
+                        time.sleep(0.35)
                     except:
                         pass
 
@@ -990,7 +984,7 @@ def get_info(message):
 
 
     except:
-        bot.send_message(message.from_user.id, "<b>⚠️ Something went wrong ;( This could be why:</b>\n"
+        bot.send_message(message.from_user.id, "<b>⚠️ Something went wrong. The reasons are:</b>\n"
                                                "1. Wrong user ID\n"
                                                "2. ID contains non Latin characters\n"
                                                "3. ID contains special characters (e.g. comma, tilde)\n",
@@ -1000,5 +994,5 @@ def get_info(message):
 while True:
     try:
         bot.polling(none_stop=True)
-    except Exception:
+    except:
         time.sleep(15)
