@@ -168,6 +168,14 @@ def get_info(message):
             pass
 
         try:
+            if get_json[0]['wall_comments'] == 1:
+                data["— Commenting"] = "Allowed"
+            else:
+                data["— Commenting"] = "Not allowed"
+        except:
+            pass
+
+        try:
             if get_json[0]['sex'] == 1:
                 data["— Sex"] = 'Female'
             elif get_json[0]['sex'] == 2:
@@ -226,7 +234,7 @@ def get_info(message):
                             get_json[0]["military"][i]['until']
                     except:
                         pass
-                    i = i + 1
+                    i += 1
         except:
             pass
 
@@ -345,7 +353,7 @@ def get_info(message):
                             get_json[0]['schools'][i]['type_str']
                     except:
                         pass
-                    i = i + 1
+                    i += 1
         except:
             pass
 
@@ -441,7 +449,7 @@ def get_info(message):
                             pass
                     except:
                         pass
-                    i = i + 1
+                    i += 1
         except:
             pass
 
@@ -950,7 +958,7 @@ def get_info(message):
                             "Status"] = get_json[0]["universities"][i]['education_status']
                     except:
                         pass
-                    i = i + 1
+                    i += 1
         except:
             pass
 
