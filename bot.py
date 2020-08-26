@@ -23,6 +23,10 @@ def find_at(msg):
             return text
 
 
+def timer():
+    time.sleep(0.4)
+
+
 def get_country_str(*country):
     country_str = api.database.getCountriesById(
         country_ids=country)
@@ -218,8 +222,8 @@ def get_info(message):
 
                     try:
                         data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Country'] = \
-                        get_country_str(get_json[0]["military"][i]['country_id'])[0]['title']
-                        time.sleep(0.35)
+                            get_country_str(get_json[0]["military"][i]['country_id'])[0]['title']
+                        timer()
                     except:
                         pass
 
@@ -306,14 +310,14 @@ def get_info(message):
                     try:
                         data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Country'] = \
                             get_country_str(get_json[0]['schools'][i]['country'])[0]['title']
-                        time.sleep(0.35)
+                        timer()
                     except:
                         pass
 
                     try:
                         data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['City'] = \
                             get_city_str(get_json[0]['schools'][i]['city'])[0]['title']
-                        time.sleep(0.35)
+                        timer()
                     except:
                         pass
 
@@ -381,7 +385,7 @@ def get_info(message):
                             data["— Career"][
                                 '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
                                 'Country'] = get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
-                            time.sleep(0.35)
+                            timer()
                         except:
                             pass
 
@@ -389,7 +393,7 @@ def get_info(message):
                             data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
                                 'Country'] = \
                                 get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
-                            time.sleep(0.35)
+                            timer()
                         except:
                             pass
 
@@ -397,7 +401,7 @@ def get_info(message):
                             data["— Career"][
                                 '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
                                 'City'] = get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
-                            time.sleep(0.35)
+                            timer()
                         except:
                             pass
 
@@ -405,7 +409,7 @@ def get_info(message):
                             data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
                                 'City'] = \
                                 get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
-                            time.sleep(0.35)
+                            timer()
                         except:
                             pass
 
@@ -431,7 +435,7 @@ def get_info(message):
 
                         try:
                             data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])]['To'] = \
-                            get_json[0]["career"][i]['until']
+                                get_json[0]["career"][i]['until']
                         except:
                             pass
 
@@ -918,14 +922,14 @@ def get_info(message):
                     try:
                         data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
                             "Country"] = get_country_str(get_json[0]["universities"][i]['country'])[0]['title']
-                        time.sleep(0.35)
+                        timer()
                     except:
                         pass
 
                     try:
                         data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
                             "City"] = get_city_str(get_json[0]["universities"][i]['city'])[0]['title']
-                        time.sleep(0.35)
+                        timer()
                     except:
                         pass
 
