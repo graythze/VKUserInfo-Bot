@@ -49,9 +49,9 @@ def regular_message(message):
 
 @bot.message_handler(commands=['help'])
 def help_message(message):
-    bot.send_message(message.from_user.id, "This bot gets all information (if available) from user's page. "
+    bot.send_message(message.from_user.id, "This bot gets all information (if available) from user's page."
                                            "Just send a text message with ID to get info about the user.\n"
-                                           "\n<b>DISCLAIMER: All data is taken from public sources by VK API's "
+                                           "\n<b>DISCLAIMER: All data is taken from public sources by VK API's"
                                            "users.get Method.</b> "
                                            "\n<b>More at vk.com/dev/users.get</b>", parse_mode="HTML")
 
@@ -70,7 +70,7 @@ def get_info(message):
             fields='photo_id, verified, sex, bdate, city, country, home_town, has_photo,'
                    'photo_max_orig, domain, has_mobile, wall_comments,'
                    'contacts, site, education, universities, schools, status, last_seen, followers_count,'
-                   'occupation, nickname, relatives, relation, personal, connections, exports, activities, interests, '
+                   'occupation, nickname, relatives, relation, personal, connections, exports, activities, interests,'
                    'music, movies, tv, books, games, about, quotes, can_post, can_see_all_posts, can_see_audio,'
                    'can_write_private_message, can_send_friend_request,'
                    'screen_name, maiden_name, crop_photo, career, military,'
@@ -202,12 +202,16 @@ def get_info(message):
                         data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Country'] = \
                             get_country_str(get_json[0]["military"][i]['country_id'])[0]['title']
                         timer()
-                    if 'from' in get_json[0]["military"][i]:
-                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['From'] = \
-                            get_json[0]["military"][i]['from']
-                    if 'until' in get_json[0]["military"][i]:
-                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Until'] = \
-                            get_json[0]["military"][i]['until']
+                    if 'from' and 'until' in get_json[0]["military"][i]:
+                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Time'] = \
+                           str(get_json[0]["military"][i]['from']) + ' — ' + str(get_json[0]["military"][i]['until'])
+                    else:
+                        if 'from' in get_json[0]["military"][i]:
+                            data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['From'] = \
+                                get_json[0]["military"][i]['from']
+                        if 'until' in get_json[0]["military"][i]:
+                            data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Until'] = \
+                                get_json[0]["military"][i]['until']
                     i += 1
 
         if 'relation' in get_json[0]:
@@ -362,8 +366,6 @@ def get_info(message):
                                 '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
                                 'Position'] = get_json[0]["career"][i]['position']
                         i += 1
-                    else:
-                        pass
 
                     if 'company' in get_json[0]["career"][i]:
                         data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])] = {}
@@ -402,8 +404,6 @@ def get_info(message):
                             data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
                                 'Position'] = get_json[0]["career"][i]['position']
                         i += 1
-                    else:
-                        pass
 
         if 'site' in get_json[0]:
             if get_json[0]['site'] == "":
@@ -430,11 +430,11 @@ def get_info(message):
                     data["— Platform"] = "Windows 8"
                 if get_json[0]["last_seen"]["platform"] == 7:
                     data["— Platform"] = "vk.com"
+        else:
+            if "deactivated" in get_json[0]:
+                pass
             else:
-                if "deactivated" in get_json[0]:
-                    pass
-                else:
-                    data["— Platform"] = "vk.me/app"
+                data["— Platform"] = "vk.me/app"
 
         if 'status' in get_json[0]:
             if get_json[0]["status"] == "":
@@ -682,8 +682,6 @@ def get_info(message):
                     data["— Personal"]["Alcohol"] = "Compromisable"
                 elif get_json[0]["personal"]["alcohol"] == 5:
                     data["— Personal"]["Alcohol"] = "Positive"
-        else:
-            pass
 
         if 'mobile_phone' in get_json[0]:
             if len(get_json[0]["mobile_phone"]) == 0:
@@ -745,8 +743,6 @@ def get_info(message):
             if 'date' in get_json[0]["crop_photo"]["photo"]:
                 data["— Avatar date"] = datetime.utcfromtimestamp(
                     get_json[0]["crop_photo"]["photo"]["date"]).strftime('%Y-%m-%d %H:%M:%S')
-            else:
-                pass
 
         if 'universities' in get_json[0]:
             if len(get_json[0]["universities"]) == 0:
@@ -793,8 +789,6 @@ def get_info(message):
                             data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
                                 "Status"] = get_json[0]["universities"][i]['education_status']
                         i += 1
-                    else:
-                        pass
 
         def serialize(dct, tabs=0):
             rslt = []
