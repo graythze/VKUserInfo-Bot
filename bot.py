@@ -15,7 +15,7 @@ from datetime import datetime
 bot = telebot.TeleBot(settings.TELEGRAM_TOKEN)
 
 session = vk.Session(access_token=settings.VK_TOKEN)
-api = vk.API(session, v='5.101', lang='ru', timeout=10)
+api = vk.API(session, v='5.89', lang='ru', timeout=10)
 
 
 def find_at(msg):
@@ -49,8 +49,8 @@ def regular_message(message):
 
 @bot.message_handler(commands=['help'])
 def help_message(message):
-    bot.send_message(message.from_user.id, "This bot gets all information (if available) from user's page."
-                                           "Just send a text message with ID to get info about the user.\n"
+    bot.send_message(message.from_user.id, "Bot collects all main information (if available) from user's page."
+                                           "To start, send a text message with ID to get info about the user.\n"
                                            "\n<b>DISCLAIMER: All data is taken from public sources by VK API's"
                                            "users.get Method.</b> "
                                            "\n<b>More at vk.com/dev/users.get</b>", parse_mode="HTML")
@@ -67,14 +67,12 @@ def get_info(message):
             at_text = str(re.findall(r'com/(.*)', at_text))[2:-2]
 
         get_json = api.users.get(
-            fields='photo_id, verified, sex, bdate, city, country, home_town, has_photo,'
-                   'photo_max_orig, domain, has_mobile, wall_comments,'
+            fields='photo_id, verified, sex, bdate, city, country, home_town, photo_max_orig, domain, wall_comments,'
                    'contacts, site, education, universities, schools, status, last_seen, followers_count,'
                    'occupation, nickname, relatives, relation, personal, connections, exports, activities, interests,'
                    'music, movies, tv, books, games, about, quotes, can_post, can_see_all_posts, can_see_audio,'
-                   'can_write_private_message, can_send_friend_request,'
-                   'screen_name, maiden_name, crop_photo, career, military,'
-                   'can_be_invited_group, counters',
+                   'can_write_private_message, can_send_friend_request, screen_name, maiden_name, crop_photo, career,'
+                   'can_be_invited_group, counters, military',
             user_ids=at_text)
 
         data = {}
@@ -117,9 +115,9 @@ def get_info(message):
 
         if 'is_closed' in get_json[0]:
             if get_json[0]['is_closed'] == "true":
-                data["— Page status"] = "Hidden"
+                data["— Page privacy"] = "Closed"
             else:
-                data["— Page status"] = "Visible"
+                data["— Page privacy"] = "Open"
 
         if 'can_write_private_message' in get_json[0]:
             if 'deactivated' in get_json[0]:
@@ -182,20 +180,19 @@ def get_info(message):
         if 'bdate' in get_json[0]:
             data["— Birthday"] = get_json[0]['bdate']
 
-        if 'photo_max_orig' in get_json[0]:
-            if 'deactivated' in get_json[0]:
-                pass
-            else:
-                data["— Thumbnail"] = get_json[0]['photo_max_orig']
+        # Better use 'crop_photo'. It takes too much lines in report. Uncomment this if you need.
+        # if 'photo_max_orig' in get_json[0]:
+        #     if 'deactivated' in get_json[0]:
+        #         pass
+        #     else:
+        #         data["— Thumbnail"] = get_json[0]['photo_max_orig']
 
         if 'military' in get_json[0]:
             if len(get_json[0]["military"]) == 0:
                 pass
             else:
-                units = len(get_json[0]["military"]) - 1
-                i = 0
                 data['— Military'] = {}
-                while i <= units:
+                for i in range(0, len(get_json[0]["military"])):
                     if 'unit' in get_json[0]["military"][i]:
                         data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']] = {}
                     if 'country_id' in get_json[0]["military"][i]:
@@ -212,7 +209,6 @@ def get_info(message):
                         if 'until' in get_json[0]["military"][i]:
                             data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Until'] = \
                                 get_json[0]["military"][i]['until']
-                    i += 1
 
         if 'relation' in get_json[0]:
             if get_json[0]['relation'] == 0:
@@ -233,6 +229,8 @@ def get_info(message):
                     data["— Relationship"]["Status"] = "Searching"
                 elif get_json[0]['relation'] == 7:
                     data["— Relationship"]["Status"] = "In love"
+                elif get_json[0]['relation'] == 8:
+                    data["— Relationship"]["Status"] = "In a civil union"
 
             if 'relation_partner' in get_json[0]:
                 if 'id' in get_json[0]['relation_partner']:
@@ -247,23 +245,24 @@ def get_info(message):
                             data["— Relationship"]["Last name"] = get_json[0]['relation_partner']["last_name"]
 
         if 'relatives' in get_json[0]:
-            data["— Relatives"] = {}
-            relatives = []
-            for item in get_json[0]["relatives"]:
-                if item["id"] < 0:
-                    relatives.append(item["type"].capitalize() + ":" + " no link")
-                else:
-                    relatives.append(item["type"].capitalize() + ":" + " vk.com/id" + str(item['id']))
-            data["— Relatives"] = relatives
+            if len(get_json[0]["relatives"]) == 0:
+                pass
+            else:
+                data["— Relatives"] = {}
+                relatives = []
+                for item in get_json[0]["relatives"]:
+                    if item["id"] < 0:
+                        relatives.append(item["type"].capitalize() + ":" + " no link")
+                    else:
+                        relatives.append(item["type"].capitalize() + ":" + " vk.com/id" + str(item['id']))
+                data["— Relatives"] = relatives
 
         if 'schools' in get_json[0]:
             if len(get_json[0]["schools"]) == 0:
                 pass
             else:
-                schools = len(get_json[0]["schools"]) - 1
-                i = 0
                 data['— Schools'] = {}
-                while i <= schools:
+                for i in range(0, len(get_json[0]["schools"])):
                     if 'name' in get_json[0]['schools'][i]:
                         data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']] = {}
 
@@ -307,19 +306,16 @@ def get_info(message):
                     if 'speciality' in get_json[0]['schools'][i]:
                         data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Speciality'] = \
                             get_json[0]['schools'][i]['speciality']
-                    if 'speciality' in get_json[0]['schools'][i]:
+                    if 'type_str' in get_json[0]['schools'][i]:
                         data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Type'] = \
                             get_json[0]['schools'][i]['type_str']
-                    i += 1
 
         if 'career' in get_json[0]:
             if len(get_json[0]["career"]) == 0:
                 pass
             else:
-                jobs = len(get_json[0]["career"]) - 1
-                i = 0
                 data["— Career"] = {}
-                while i <= jobs:
+                for i in range(0, len(get_json[0]["career"])):
                     if 'group_id' in get_json[0]["career"][i]:
                         data["— Career"][
                             '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])] = {}
@@ -365,7 +361,6 @@ def get_info(message):
                             data["— Career"][
                                 '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
                                 'Position'] = get_json[0]["career"][i]['position']
-                        i += 1
 
                     if 'company' in get_json[0]["career"][i]:
                         data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])] = {}
@@ -403,7 +398,6 @@ def get_info(message):
                         if 'position' in get_json[0]["career"][i]:
                             data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
                                 'Position'] = get_json[0]["career"][i]['position']
-                        i += 1
 
         if 'site' in get_json[0]:
             if get_json[0]['site'] == "":
@@ -592,8 +586,9 @@ def get_info(message):
                     pass
                 else:
                     data["— Number of"]["Pages"] = get_json[0]["counters"]["pages"]
-        else:
-            pass
+
+            if len(data["— Number of"]) == 0:
+                del data["— Number of"]
 
         if 'personal' in get_json[0]:
             data["— Personal"] = {}
@@ -727,12 +722,9 @@ def get_info(message):
         try:
             link = settings.FOAF_LINK + str(get_json[0]['id'])
             with urllib.request.urlopen(link) as response:
-                vk_xml = response.read().decode("windows-1251")
-            parsed_xml = str(re.findall(r'ya:created dc:date="(.*)"', vk_xml))
+                parsed_xml = str(re.findall(r'ya:created dc:date="(.*)"', response.read().decode("windows-1251")))
             if len(parsed_xml) > 2:
                 data["— Registered"] = parsed_xml[2:-8].replace('T', " ")
-            else:
-                pass
         except:
             pass
 
@@ -748,10 +740,8 @@ def get_info(message):
             if len(get_json[0]["universities"]) == 0:
                 pass
             else:
-                unis = len(get_json[0]["universities"]) - 1
-                i = 0
                 data["— Education"] = {}
-                while i <= unis:
+                for i in range(0, len(get_json[0]["universities"])):
                     if 'name' in get_json[0]["universities"][i]:
                         data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])] = {}
                         if 'country' and 'city' in get_json[0]["universities"][i]:
@@ -788,7 +778,6 @@ def get_info(message):
                         if 'education_status' in get_json[0]["universities"][i]:
                             data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
                                 "Status"] = get_json[0]["universities"][i]['education_status']
-                        i += 1
 
         def serialize(dct, tabs=0):
             rslt = []
@@ -831,6 +820,6 @@ def get_info(message):
 while True:
     try:
         bot.polling(none_stop=True)
-    except Exception as e:
-        print(e)
+    except:
+        traceback.print_exc()
         time.sleep(15)
