@@ -15,7 +15,7 @@ from datetime import datetime
 bot = telebot.TeleBot(settings.TELEGRAM_TOKEN)
 
 session = vk.Session(access_token=settings.VK_TOKEN)
-api = vk.API(session, v='5.89', lang='ru', timeout=10)
+api = vk.API(session, v='5.124', lang='ru', timeout=10)
 
 
 def find_at(msg):
@@ -25,7 +25,7 @@ def find_at(msg):
 
 
 def timer():
-    time.sleep(0.4)
+    time.sleep(0.35)
 
 
 def get_country_str(*country):
@@ -81,7 +81,7 @@ def get_info(message):
             data["— ID"] = get_json[0]['id']
 
         if 'first_name' and 'last_name' in get_json[0]:
-            data["— Name"] = str(get_json[0]['first_name']) + ' ' + str(get_json[0]['last_name'])
+            data["— Name"] = get_json[0]['first_name'] + ' ' + get_json[0]['last_name']
         else:
             if 'first_name' in get_json[0]:
                 if get_json[0]['first_name'] == "":
@@ -192,23 +192,23 @@ def get_info(message):
                 pass
             else:
                 data['— Military'] = {}
-                for i in range(0, len(get_json[0]["military"])):
-                    if 'unit' in get_json[0]["military"][i]:
-                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']] = {}
-                    if 'country_id' in get_json[0]["military"][i]:
-                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Country'] = \
-                            get_country_str(get_json[0]["military"][i]['country_id'])[0]['title']
+                x = 0
+                for i in get_json[0]["military"]:
+                    if 'unit' in i:
+                        data["— Military"]["#" + str(x + 1) + ", " + i['unit']] = {}
+                    if 'country_id' in i:
+                        data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Country'] = \
+                        get_country_str(i['country_id'])[0]['title']
                         timer()
-                    if 'from' and 'until' in get_json[0]["military"][i]:
-                        data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Time'] = \
-                           str(get_json[0]["military"][i]['from']) + ' — ' + str(get_json[0]["military"][i]['until'])
+                    if 'from' and 'until' in i:
+                        data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Time'] = str(i['from']) + ' — ' + str(
+                            i['until'])
                     else:
-                        if 'from' in get_json[0]["military"][i]:
-                            data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['From'] = \
-                                get_json[0]["military"][i]['from']
-                        if 'until' in get_json[0]["military"][i]:
-                            data["— Military"]['#' + str(i + 1) + ', ' + get_json[0]["military"][i]['unit']]['Until'] = \
-                                get_json[0]["military"][i]['until']
+                        if 'from' in i:
+                            data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['From'] = i['from']
+                        if 'until' in i:
+                            data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Until'] = i['until']
+                    x += 1
 
         if 'relation' in get_json[0]:
             if get_json[0]['relation'] == 0:
@@ -233,16 +233,15 @@ def get_info(message):
                     data["— Relationship"]["Status"] = "In a civil union"
 
             if 'relation_partner' in get_json[0]:
-                if 'id' in get_json[0]['relation_partner']:
-                    data["— Relationship"]["Partner ID"] = "vk.com/id" + str(get_json[0]['relation_partner']['id'])
-                    if 'first_name' and 'last_name' in get_json[0]['relation_partner']:
-                        data["— Relationship"]["Name"] = get_json[0]['relation_partner']["first_name"] + ' ' + \
-                                                         get_json[0]['relation_partner']["last_name"]
+                for i in get_json[0]['relation_partner']:
+                    data["— Relationship"]["Partner ID"] = "vk.com/id" + str(i['id'])
+                    if 'first_name' and 'last_name' in i:
+                        data["— Relationship"]["Name"] = i["first_name"] + ' ' + i["last_name"]
                     else:
-                        if 'first_name' in get_json[0]['relation_partner']:
-                            data["— Relationship"]["First name"] = get_json[0]['relation_partner']["first_name"]
-                        if 'last_name' in get_json[0]['relation_partner']:
-                            data["— Relationship"]["Last name"] = get_json[0]['relation_partner']["last_name"]
+                        if 'first_name' in i:
+                            data["— Relationship"]["First name"] = i["first_name"]
+                        if 'last_name' in i:
+                            data["— Relationship"]["Last name"] = i["last_name"]
 
         if 'relatives' in get_json[0]:
             if len(get_json[0]["relatives"]) == 0:
@@ -250,11 +249,14 @@ def get_info(message):
             else:
                 data["— Relatives"] = {}
                 relatives = []
-                for item in get_json[0]["relatives"]:
-                    if item["id"] < 0:
-                        relatives.append(item["type"].capitalize() + ":" + " no link")
+                for i in get_json[0]["relatives"]:
+                    if i["id"] < 0:
+                        if 'id' and 'name' in i:
+                            relatives.append(i["type"].capitalize() + ": " + i['name'])
+                        else:
+                            relatives.append(i["type"].capitalize() + ":" + " no link")
                     else:
-                        relatives.append(item["type"].capitalize() + ":" + " vk.com/id" + str(item['id']))
+                        relatives.append(i["type"].capitalize() + ":" + " vk.com/id" + str(i['id']))
                 data["— Relatives"] = relatives
 
         if 'schools' in get_json[0]:
@@ -262,142 +264,120 @@ def get_info(message):
                 pass
             else:
                 data['— Schools'] = {}
-                for i in range(0, len(get_json[0]["schools"])):
-                    if 'name' in get_json[0]['schools'][i]:
-                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']] = {}
+                x = 0
+                for i in get_json[0]["schools"]:
+                    if 'name' in i:
+                        data['— Schools']["#" + str(x + 1) + ", " + i['name']] = {}
 
-                    if 'country' and 'city' in get_json[0]['schools'][i]:
-                        country_str = get_country_str(get_json[0]['schools'][i]['country'])[0]['title']
+                    if 'country' and 'city' in i:
+                        country_str = get_country_str(i['country'])[0]['title']
                         timer()
-                        city_str = get_city_str(get_json[0]['schools'][i]['city'])[0]['title']
+                        city_str = get_city_str(i['city'])[0]['title']
                         timer()
-                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Place'] = \
-                            str(country_str) + ', ' + str(city_str)
+                        data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Place'] = str(country_str) + ', ' + str(
+                            city_str)
                     else:
-                        if 'country' in get_json[0]['schools'][i]:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Country'] = \
-                                get_country_str(get_json[0]['schools'][i]['country'])[0]['title']
+                        if 'country' in i:
+                            data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Country'] = \
+                            get_country_str(i['country'])[0]['title']
                             timer()
-                        if 'city' in get_json[0]['schools'][i]:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['City'] = \
-                                get_city_str(get_json[0]['schools'][i]['city'])[0]['title']
+                        if 'city' in i:
+                            data['— Schools']["#" + str(x + 1) + ", " + i['name']]['City'] = get_city_str(i['city'])[0][
+                                'title']
                             timer()
 
-                    if 'year_from' and 'year_to' in get_json[0]['schools'][i]:
-                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Studying'] = \
-                            str(get_json[0]['schools'][i]['year_from']) + ' — ' + str(
-                                get_json[0]['schools'][i]['year_to'])
+                    if 'year_from' and 'year_to' in i:
+                        data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Studying'] = str(
+                            i['year_from']) + ' — ' + str(i['year_to'])
                     else:
-                        if 'year_from' in get_json[0]['schools'][i]:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['From'] = \
-                                get_json[0]['schools'][i]['year_from']
-                        if 'year_to' in get_json[0]['schools'][i]:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['To'] = \
-                                get_json[0]['schools'][i]['year_to']
-                    if 'year_graduated' in get_json[0]['schools'][i]:
-                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Graduated'] = \
-                            get_json[0]['schools'][i]['year_graduated']
-                    if 'class' in get_json[0]['schools'][i]:
-                        if get_json[0]['schools'][i]['class'] == "":
+                        if 'year_from' in i:
+                            data['— Schools']["#" + str(x + 1) + ", " + i['name']]['From'] = i['year_from']
+                        if 'year_to' in i:
+                            data['— Schools']["#" + str(x + 1) + ", " + i['name']]['To'] = i['year_to']
+                    if 'year_graduated' in i:
+                        data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Graduated'] = i['year_graduated']
+                    if 'class' in i:
+                        if i['class'] == "":
                             pass
                         else:
-                            data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Class'] = \
-                                get_json[0]['schools'][i]['class']
-                    if 'speciality' in get_json[0]['schools'][i]:
-                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Speciality'] = \
-                            get_json[0]['schools'][i]['speciality']
-                    if 'type_str' in get_json[0]['schools'][i]:
-                        data['— Schools']['#' + str(i + 1) + ', ' + get_json[0]['schools'][i]['name']]['Type'] = \
-                            get_json[0]['schools'][i]['type_str']
+                            data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Class'] = i['class']
+                    if 'speciality' in i:
+                        data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Speciality'] = i['speciality']
+                    if 'type_str' in i:
+                        data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Type'] = i['type_str']
+                    x += 1
 
         if 'career' in get_json[0]:
             if len(get_json[0]["career"]) == 0:
                 pass
             else:
                 data["— Career"] = {}
-                for i in range(0, len(get_json[0]["career"])):
-                    if 'group_id' in get_json[0]["career"][i]:
-                        data["— Career"][
-                            '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])] = {}
-                        if 'country_id' and 'city_id' in get_json[0]["career"][i]:
-                            country_str = get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
+                x = 0
+                for i in get_json[0]["career"]:
+                    if 'group_id' in i:
+                        data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])] = {}
+                        if 'country_id' and 'city_id' in i:
+                            country_str = get_country_str(i['country_id'])[0]['title']
                             timer()
-                            city_str = get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
+                            city_str = get_city_str(i['city_id'])[0]['title']
                             timer()
-                            data["— Career"][
-                                '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
+                            data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
                                 'Place'] = str(country_str) + ', ' + str(city_str)
                         else:
-                            if 'country_id' in get_json[0]["career"][i]:
-                                data["— Career"][
-                                    '#' + str(i + 1) + ', ' + 'vk.com/public' + str(
-                                        get_json[0]["career"][i]['group_id'])][
-                                    'Country'] = get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
+                            if 'country_id' in i:
+                                data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                                    'Country'] = get_country_str(i['country_id'])[0]['title']
                                 timer()
-                            if 'city_id' in get_json[0]["career"][i]:
-                                data["— Career"][
-                                    '#' + str(i + 1) + ', ' + 'vk.com/public' + str(
-                                        get_json[0]["career"][i]['group_id'])][
-                                    'City'] = get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
+                            if 'city_id' in i:
+                                data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                                    'City'] = get_city_str(i['city_id'])[0]['title']
                                 timer()
 
-                        if 'from' and 'until' in get_json[0]["career"][i]:
-                            data["— Career"][
-                                '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
-                                'Period'] = str(get_json[0]["career"][i]['from']) + ' — ' + str(
-                                get_json[0]["career"][i]['until'])
+                        if 'from' and 'until' in i:
+                            data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                                'Period'] = str(i['from']) + ' — ' + str(i['until'])
                         else:
-                            if 'from' in get_json[0]["career"][i]:
-                                data["— Career"][
-                                    '#' + str(i + 1) + ', ' + 'vk.com/public' + str(
-                                        get_json[0]["career"][i]['group_id'])][
-                                    'From'] = get_json[0]["career"][i]['from']
-                            if 'until' in get_json[0]["career"][i]:
-                                data["— Career"][
-                                    '#' + str(i + 1) + ', ' + 'vk.com/public' + str(
-                                        get_json[0]["career"][i]['group_id'])][
-                                    'To'] = get_json[0]["career"][i]['until']
-                        if 'position' in get_json[0]["career"][i]:
-                            data["— Career"][
-                                '#' + str(i + 1) + ', ' + 'vk.com/public' + str(get_json[0]["career"][i]['group_id'])][
-                                'Position'] = get_json[0]["career"][i]['position']
+                            if 'from' in i:
+                                data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                                    'From'] = i['from']
+                            if 'until' in i:
+                                data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])]['To'] = \
+                                i['until']
+                        if 'position' in i:
+                            data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                                'Position'] = i['position']
 
-                    if 'company' in get_json[0]["career"][i]:
-                        data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])] = {}
+                    if 'company' in i:
+                        data["— Career"]["#" + str(x + 1) + ", " + i['company']] = {}
 
-                        if 'country_id' and 'city_id' in get_json[0]["career"][i]:
-                            country_str = get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
+                        if 'country_id' and 'city_id' in i:
+                            country_str = get_country_str(i['country_id'])[0]['title']
                             timer()
-                            city_str = get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
+                            city_str = get_city_str(i['city_id'])[0]['title']
                             timer()
-                            data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
-                                'Place'] = str(country_str) + ', ' + str(city_str)
+                            data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Place'] = str(
+                                country_str) + ', ' + str(city_str)
                         else:
-                            if 'country_id' in get_json[0]["career"][i]:
-                                data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
-                                    'Country'] = get_country_str(get_json[0]["career"][i]['country_id'])[0]['title']
+                            if 'country_id' in i:
+                                data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Country'] = \
+                                get_country_str(i['country_id'])[0]['title']
                                 timer()
-                            if 'city_id' in get_json[0]["career"][i]:
-                                data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
-                                    'City'] = get_city_str(get_json[0]["career"][i]['city_id'])[0]['title']
+                            if 'city_id' in i:
+                                data["— Career"]["#" + str(x + 1) + ", " + i['company']]['City'] = \
+                                get_city_str(i['city_id'])[0]['title']
                                 timer()
 
-                        if 'from' and 'until' in get_json[0]["career"][i]:
-                            data["— Career"][
-                                '#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
-                                'Period'] = str(get_json[0]["career"][i]['from']) + ' — ' + str(
-                                get_json[0]["career"][i]['until'])
+                        if 'from' and 'until' in i:
+                            data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Period'] = str(
+                                i['from']) + ' — ' + str(i['until'])
                         else:
-                            if 'from' in get_json[0]["career"][i]:
-                                data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
-                                    'From'] = get_json[0]["career"][i]['from']
-                            if 'until' in get_json[0]["career"][i]:
-                                data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
-                                    'To'] = \
-                                    get_json[0]["career"][i]['until']
-                        if 'position' in get_json[0]["career"][i]:
-                            data["— Career"]['#' + str(i + 1) + ', ' + str(get_json[0]["career"][i]['company'])][
-                                'Position'] = get_json[0]["career"][i]['position']
+                            if 'from' in i:
+                                data["— Career"]["#" + str(x + 1) + ", " + i['company']]['From'] = i['from']
+                            if 'until' in i:
+                                data["— Career"]["#" + str(x + 1) + ", " + i['company']]['To'] = i['until']
+                        if 'position' in i:
+                            data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Position'] = i['position']
+                    x += 1
 
         if 'site' in get_json[0]:
             if get_json[0]['site'] == "":
@@ -429,6 +409,7 @@ def get_info(message):
                 pass
             else:
                 data["— Platform"] = "vk.me/app"
+                data["— Last seen"] = "Hidden"
 
         if 'status' in get_json[0]:
             if get_json[0]["status"] == "":
@@ -741,43 +722,38 @@ def get_info(message):
                 pass
             else:
                 data["— Education"] = {}
-                for i in range(0, len(get_json[0]["universities"])):
-                    if 'name' in get_json[0]["universities"][i]:
-                        data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])] = {}
-                        if 'country' and 'city' in get_json[0]["universities"][i]:
-                            country_str = get_country_str(get_json[0]["universities"][i]['country'])[0]['title']
+                x = 0
+                for i in get_json[0]["universities"]:
+                    if 'name' in i:
+                        data["— Education"]["#" + str(x + 1) + ", " + i['name']] = {}
+                    if 'country' and 'city' in i:
+                        country_str = get_country_str(i['country'])[0]['title']
+                        timer()
+                        city_str = get_city_str(i['city'])[0]['title']
+                        timer()
+                        data["— Education"]["#" + str(x + 1) + ", " + i['name']][
+                            "Place"] = country_str + ', ' + city_str
+                    else:
+                        if 'country' in i:
+                            data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Country"] = \
+                            get_country_str(i['country'])[0]['title']
                             timer()
-                            city_str = get_city_str(get_json[0]["universities"][i]['city'])[0]['title']
+                        if 'city' in i:
+                            data["— Education"]["#" + str(x + 1) + ", " + i['name']]["City"] = \
+                            get_city_str(i['city'])[0]['title']
                             timer()
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
-                                "Place"] = country_str + ', ' + city_str
-                        else:
-                            if 'country' in get_json[0]["universities"][i]:
-                                data["— Education"][
-                                    '#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
-                                    "Country"] = get_country_str(get_json[0]["universities"][i]['country'])[0]['title']
-                                timer()
-                            if 'city' in get_json[0]["universities"][i]:
-                                data["— Education"][
-                                    '#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
-                                    "City"] = get_city_str(get_json[0]["universities"][i]['city'])[0]['title']
-                                timer()
 
-                        if 'faculty_name' in get_json[0]["universities"][i]:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
-                                "Faculty"] = get_json[0]["universities"][i]['faculty_name']
-                        if 'chair_name' in get_json[0]["universities"][i]:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
-                                "Study program"] = get_json[0]["universities"][i]['chair_name']
-                        if 'graduation' in get_json[0]["universities"][i]:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
-                                "Graduation"] = get_json[0]["universities"][i]['graduation']
-                        if 'education_form' in get_json[0]["universities"][i]:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
-                                "Form"] = get_json[0]["universities"][i]['education_form']
-                        if 'education_status' in get_json[0]["universities"][i]:
-                            data["— Education"]['#' + str(i + 1) + ', ' + str(get_json[0]["universities"][i]['name'])][
-                                "Status"] = get_json[0]["universities"][i]['education_status']
+                    if 'faculty_name' in i:
+                        data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Faculty"] = i['faculty_name']
+                    if 'chair_name' in i:
+                        data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Study program"] = i['chair_name']
+                    if 'graduation' in i:
+                        data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Graduation"] = i['graduation']
+                    if 'education_form' in i:
+                        data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Form"] = i['education_form']
+                    if 'education_status' in i:
+                        data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Status"] = i['education_status']
+                    x += 1
 
         def serialize(dct, tabs=0):
             rslt = []
@@ -800,8 +776,7 @@ def get_info(message):
 
         ready_text = util.split_string(result, 4096)
 
-        bot.send_message(message.from_user.id,
-                         "⌛ Requested info for " + at_text + " on " + str(
+        bot.send_message(message.from_user.id, "⌛ Requested info for " + at_text + " on " + str(
                              datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")) + " UTC")
 
         for text in ready_text:
