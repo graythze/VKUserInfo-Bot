@@ -72,8 +72,7 @@ def get_info(message):
                    'occupation, nickname, relatives, relation, personal, connections, exports, activities, interests,'
                    'music, movies, tv, books, games, about, quotes, can_post, can_see_all_posts, can_see_audio,'
                    'can_write_private_message, can_send_friend_request, screen_name, maiden_name, crop_photo, career,'
-                   'can_be_invited_group, counters, military',
-            user_ids=at_text)
+                   'can_be_invited_group, counters, military', user_ids=at_text)
 
         data = {}
 
@@ -180,13 +179,6 @@ def get_info(message):
         if 'bdate' in get_json[0]:
             data["— Birthday"] = get_json[0]['bdate']
 
-        # Better use 'crop_photo'. It takes too much lines in report. Uncomment this if you need.
-        # if 'photo_max_orig' in get_json[0]:
-        #     if 'deactivated' in get_json[0]:
-        #         pass
-        #     else:
-        #         data["— Thumbnail"] = get_json[0]['photo_max_orig']
-
         if 'military' in get_json[0]:
             if len(get_json[0]["military"]) == 0:
                 pass
@@ -198,7 +190,7 @@ def get_info(message):
                         data["— Military"]["#" + str(x + 1) + ", " + i['unit']] = {}
                     if 'country_id' in i:
                         data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Country'] = \
-                        get_country_str(i['country_id'])[0]['title']
+                            get_country_str(i['country_id'])[0]['title']
                         timer()
                     if 'from' and 'until' in i:
                         data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Time'] = str(i['from']) + ' — ' + str(
@@ -279,7 +271,7 @@ def get_info(message):
                     else:
                         if 'country' in i:
                             data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Country'] = \
-                            get_country_str(i['country'])[0]['title']
+                                get_country_str(i['country'])[0]['title']
                             timer()
                         if 'city' in i:
                             data['— Schools']["#" + str(x + 1) + ", " + i['name']]['City'] = get_city_str(i['city'])[0][
@@ -342,7 +334,7 @@ def get_info(message):
                                     'From'] = i['from']
                             if 'until' in i:
                                 data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])]['To'] = \
-                                i['until']
+                                    i['until']
                         if 'position' in i:
                             data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
                                 'Position'] = i['position']
@@ -360,11 +352,11 @@ def get_info(message):
                         else:
                             if 'country_id' in i:
                                 data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Country'] = \
-                                get_country_str(i['country_id'])[0]['title']
+                                    get_country_str(i['country_id'])[0]['title']
                                 timer()
                             if 'city_id' in i:
                                 data["— Career"]["#" + str(x + 1) + ", " + i['company']]['City'] = \
-                                get_city_str(i['city_id'])[0]['title']
+                                    get_city_str(i['city_id'])[0]['title']
                                 timer()
 
                         if 'from' and 'until' in i:
@@ -712,10 +704,16 @@ def get_info(message):
         if 'crop_photo' in get_json[0]:
             if 'photo' in get_json[0]["crop_photo"]:
                 full_size_ava = max(get_json[0]["crop_photo"]["photo"]['sizes'], key=lambda line: int(line['width']))
-                data["— Full avatar"] = full_size_ava['url']
+                data["— Avatar"] = full_size_ava['url']
             if 'date' in get_json[0]["crop_photo"]["photo"]:
                 data["— Avatar date"] = datetime.utcfromtimestamp(
                     get_json[0]["crop_photo"]["photo"]["date"]).strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            if 'photo_max_orig' in get_json[0]:
+                if 'deactivated' in get_json[0]:
+                    pass
+                else:
+                    data["— Avatar"] = get_json[0]['photo_max_orig']
 
         if 'universities' in get_json[0]:
             if len(get_json[0]["universities"]) == 0:
@@ -736,11 +734,11 @@ def get_info(message):
                     else:
                         if 'country' in i:
                             data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Country"] = \
-                            get_country_str(i['country'])[0]['title']
+                                get_country_str(i['country'])[0]['title']
                             timer()
                         if 'city' in i:
                             data["— Education"]["#" + str(x + 1) + ", " + i['name']]["City"] = \
-                            get_city_str(i['city'])[0]['title']
+                                get_city_str(i['city'])[0]['title']
                             timer()
 
                     if 'faculty_name' in i:
@@ -777,7 +775,7 @@ def get_info(message):
         ready_text = util.split_string(result, 4096)
 
         bot.send_message(message.from_user.id, "⌛ Requested info for " + at_text + " on " + str(
-                             datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")) + " UTC")
+            datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")) + " UTC")
 
         for text in ready_text:
             bot.send_message(message.from_user.id, text)
