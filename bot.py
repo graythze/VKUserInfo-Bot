@@ -68,7 +68,7 @@ def get_info(message):
 
         get_json = api.users.get(
             fields='photo_id, verified, sex, bdate, city, country, home_town, photo_max_orig, domain, wall_comments,'
-                   'contacts, site, education, universities, schools, status, last_seen, followers_count,'
+                   'contacts, site, education, universities, schools, status, last_seen, followers_count, has_photo,'
                    'occupation, nickname, relatives, relation, personal, connections, exports, activities, interests,'
                    'music, movies, tv, books, games, about, quotes, can_post, can_see_all_posts, can_see_audio,'
                    'can_write_private_message, can_send_friend_request, screen_name, maiden_name, crop_photo, career,'
@@ -673,7 +673,7 @@ def get_info(message):
             data["— Twitter"] = "@" + get_json[0]["twitter"]
 
         if 'livejournal' in get_json[0]:
-            data["— LiveJournal"] = get_json[0]["livejournal"] + ".livejournal.com"
+            data["— LiveJournal"] = "@" + get_json[0]["livejournal"]
 
         if 'facebook' in get_json[0]:
             data["— Facebook"] = "facebook.com/profile.php?id=" + get_json[0]["facebook"]
@@ -701,19 +701,18 @@ def get_info(message):
         except:
             pass
 
-        if 'crop_photo' in get_json[0]:
-            if 'photo' in get_json[0]["crop_photo"]:
-                full_size_ava = max(get_json[0]["crop_photo"]["photo"]['sizes'], key=lambda line: int(line['width']))
-                data["— Avatar"] = full_size_ava['url']
-            if 'date' in get_json[0]["crop_photo"]["photo"]:
-                data["— Avatar date"] = datetime.utcfromtimestamp(
-                    get_json[0]["crop_photo"]["photo"]["date"]).strftime('%Y-%m-%d %H:%M:%S')
-        else:
-            if 'photo_max_orig' in get_json[0]:
-                if 'deactivated' in get_json[0]:
-                    pass
-                else:
-                    data["— Avatar"] = get_json[0]['photo_max_orig']
+        if 'has_photo' in get_json[0]:
+            if get_json[0]['has_photo'] == 0:
+                pass
+            else:
+                if 'crop_photo' in get_json[0]:
+                    if 'photo' in get_json[0]["crop_photo"]:
+                        full_size_ava = max(get_json[0]["crop_photo"]["photo"]['sizes'],
+                                            key=lambda line: int(line['width']))
+                        data["— Avatar"] = full_size_ava['url']
+                    if 'date' in get_json[0]["crop_photo"]["photo"]:
+                        data["— Avatar date"] = datetime.utcfromtimestamp(
+                            get_json[0]["crop_photo"]["photo"]["date"]).strftime('%Y-%m-%d %H:%M:%S')
 
         if 'universities' in get_json[0]:
             if len(get_json[0]["universities"]) == 0:
