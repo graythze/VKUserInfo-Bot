@@ -72,7 +72,7 @@ def get_info(message):
                    'occupation, nickname, relatives, relation, personal, connections, exports, activities, interests,'
                    'music, movies, tv, books, games, about, quotes, can_post, can_see_all_posts, can_see_audio,'
                    'can_write_private_message, can_send_friend_request, screen_name, maiden_name, crop_photo, career,'
-                   'can_be_invited_group, counters, military', user_ids=at_text)
+                   'can_be_invited_group, counters, military, is_closed', user_ids=at_text)
 
         data = {}
 
@@ -112,12 +112,6 @@ def get_info(message):
             else:
                 data["— Page status"] = "Blocked"
 
-        if 'is_closed' in get_json[0]:
-            if get_json[0]['is_closed'] == "true":
-                data["— Page privacy"] = "Closed"
-            else:
-                data["— Page privacy"] = "Open"
-
         if 'can_write_private_message' in get_json[0]:
             if 'deactivated' in get_json[0]:
                 pass
@@ -127,38 +121,43 @@ def get_info(message):
                 else:
                     data["— PM"] = "Allowed"
 
-        if 'can_see_all_posts' in get_json[0]:
-            if get_json[0]["can_see_all_posts"] == 0:
-                data["— All posts"] = "Hidden"
-            else:
-                data["— All posts"] = "Visible"
+        if 'is_closed' in get_json[0]:
+            if not get_json[0]['is_closed']:
+                data["— Page privacy"] = "Open"
+                if 'can_see_all_posts' in get_json[0]:
+                    if get_json[0]["can_see_all_posts"] == 0:
+                        data["— All posts"] = "Hidden"
+                    else:
+                        data["— All posts"] = "Visible"
 
-        if 'can_post' in get_json[0]:
-            if 'deactivated' in get_json[0]:
-                pass
-            else:
-                if get_json[0]["can_post"] == 0:
-                    data["— Posting"] = "Not allowed"
-                else:
-                    data["— Posting"] = "Allowed"
+                if 'can_post' in get_json[0]:
+                    if 'deactivated' in get_json[0]:
+                        pass
+                    else:
+                        if get_json[0]["can_post"] == 0:
+                            data["— Posting"] = "Not allowed"
+                        else:
+                            data["— Posting"] = "Allowed"
 
-        if 'can_see_audio' in get_json[0]:
-            if get_json[0]["can_see_audio"] == 0:
-                data["— Audio"] = "Hidden"
+                if 'can_see_audio' in get_json[0]:
+                    if get_json[0]["can_see_audio"] == 0:
+                        data["— Audio"] = "Hidden"
+                    else:
+                        data["— Audio"] = "Visible"
+
+                if 'wall_comments' in get_json[0]:
+                    if get_json[0]['wall_comments'] == 1:
+                        data["— Commenting"] = "Allowed"
+                    else:
+                        data["— Commenting"] = "Not allowed"
             else:
-                data["— Audio"] = "Visible"
+                data["— Page privacy"] = "Closed"
 
         if 'can_send_friend_request' in get_json[0]:
             if get_json[0]["can_send_friend_request"] == 0:
                 data["— Friend request"] = "Not allowed"
             else:
                 data["— Friend request"] = "Allowed"
-
-        if 'wall_comments' in get_json[0]:
-            if get_json[0]['wall_comments'] == 1:
-                data["— Commenting"] = "Allowed"
-            else:
-                data["— Commenting"] = "Not allowed"
 
         if 'sex' in get_json[0]:
             if 'first_name' in get_json[0]:
@@ -173,8 +172,6 @@ def get_info(message):
         if 'verified' in get_json[0]:
             if get_json[0]['verified'] == 1:
                 data["— Verified"] = "Yes"
-            else:
-                data["— Verified"] = "No"
 
         if 'bdate' in get_json[0]:
             data["— Birthday"] = get_json[0]['bdate']
