@@ -1,11 +1,10 @@
-# 📄 VK User Info bot [Beta]
+# 📄 VK User Info Bot
 Telegram bot which uses VK API [users.get][1] method to get detailed information about user by ID.
 
 Built by [pyTelegramBotAPI][5] and [vk][6]
 
 Bot avaiable at [@VKUserInfo_bot][4]
 
-`NOTICE: This bot is still work in progress. Code or design may be not optimized, some functions don't work correctly. Pull requests are welcome.`
 
 ### 🛠 Setup
 You need to set variables in settings.py:

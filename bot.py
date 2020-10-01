@@ -675,13 +675,17 @@ def get_info(message):
         if 'facebook' in get_json[0]:
             data["— Facebook"] = "facebook.com/profile.php?id=" + get_json[0]["facebook"]
 
-        if 'country' in get_json[0]:
-            if 'title' in get_json[0]["country"]:
-                data["— Country"] = get_json[0]["country"]["title"]
+        if 'country' and 'city' in get_json[0]:
+            if 'title' in get_json[0]["country"] and 'title' in get_json[0]["city"]:
+                data["— Location"] = get_json[0]["country"]["title"] + ', ' + get_json[0]["city"]["title"]
+        else:
+            if 'country' in get_json[0]:
+                if 'title' in get_json[0]["country"]:
+                    data["— Country"] = get_json[0]["country"]["title"]
 
-        if 'city' in get_json[0]:
-            if 'title' in get_json[0]["city"]:
-                data["— City"] = get_json[0]["city"]["title"]
+            if 'city' in get_json[0]:
+                if 'title' in get_json[0]["city"]:
+                    data["— City"] = get_json[0]["city"]["title"]
 
         if 'home_town' in get_json[0]:
             if get_json[0]["home_town"] == "":
