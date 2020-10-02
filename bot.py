@@ -725,21 +725,30 @@ def get_info(message):
                     if 'name' in i:
                         data["— Education"]["#" + str(x + 1) + ", " + i['name']] = {}
                     if 'country' and 'city' in i:
-                        country_str = get_country_str(i['country'])[0]['title']
-                        timer()
-                        city_str = get_city_str(i['city'])[0]['title']
-                        timer()
-                        data["— Education"]["#" + str(x + 1) + ", " + i['name']][
-                            "Place"] = country_str + ', ' + city_str
+                        if i['country'] == 0 and i['city'] == 0:
+                            pass
+                        else:
+                            country_str = get_country_str(i['country'])[0]['title']
+                            timer()
+                            city_str = get_city_str(i['city'])[0]['title']
+                            timer()
+                            data["— Education"]["#" + str(x + 1) + ", " + i['name']][
+                                "Place"] = country_str + ', ' + city_str
                     else:
                         if 'country' in i:
-                            data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Country"] = \
-                                get_country_str(i['country'])[0]['title']
-                            timer()
+                            if i['country'] == 0:
+                                pass
+                            else:
+                                data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Country"] = \
+                                    get_country_str(i['country'])[0]['title']
+                                timer()
                         if 'city' in i:
-                            data["— Education"]["#" + str(x + 1) + ", " + i['name']]["City"] = \
-                                get_city_str(i['city'])[0]['title']
-                            timer()
+                            if i['city'] == 0:
+                                pass
+                            else:
+                                data["— Education"]["#" + str(x + 1) + ", " + i['name']]["City"] = \
+                                    get_city_str(i['city'])[0]['title']
+                                timer()
 
                     if 'faculty_name' in i:
                         data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Faculty"] = i['faculty_name']
