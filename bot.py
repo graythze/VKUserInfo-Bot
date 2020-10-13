@@ -222,15 +222,15 @@ def get_info(message):
                     data["— Relationship"]["Status"] = "In a civil union"
 
             if 'relation_partner' in get_json[0]:
-                for i in get_json[0]['relation_partner']:
-                    data["— Relationship"]["Partner ID"] = "vk.com/id" + str(i['id'])
-                    if 'first_name' and 'last_name' in i:
-                        data["— Relationship"]["Name"] = i["first_name"] + ' ' + i["last_name"]
-                    else:
-                        if 'first_name' in i:
-                            data["— Relationship"]["First name"] = i["first_name"]
-                        if 'last_name' in i:
-                            data["— Relationship"]["Last name"] = i["last_name"]
+                data["— Relationship"]["Partner ID"] = "vk.com/id" + str(get_json[0]['relation_partner']['id'])
+                if 'first_name' and 'last_name' in get_json[0]['relation_partner']:
+                    data["— Relationship"]["Name"] = get_json[0]['relation_partner']["first_name"] + ' ' + \
+                                                     get_json[0]['relation_partner']["last_name"]
+                else:
+                    if 'first_name' in get_json[0]['relation_partner']:
+                        data["— Relationship"]["First name"] = get_json[0]['relation_partner']["first_name"]
+                    if 'last_name' in get_json[0]['relation_partner']:
+                        data["— Relationship"]["Last name"] = get_json[0]['relation_partner']["last_name"]
 
         if 'relatives' in get_json[0]:
             if len(get_json[0]["relatives"]) == 0:
