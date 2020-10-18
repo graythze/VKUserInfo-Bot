@@ -67,7 +67,7 @@ def get_info(message):
             at_text = str(re.findall(r'com/(.*)', at_text))[2:-2]
 
         get_json = api.users.get(
-            fields='photo_id, verified, sex, bdate, city, country, home_town, photo_max_orig, domain, wall_comments,'
+            fields='verified, sex, bdate, city, country, home_town, photo_max_orig, domain, wall_comments,'
                    'contacts, site, education, universities, schools, status, last_seen, followers_count, has_photo,'
                    'occupation, nickname, relatives, relation, personal, connections, exports, activities, interests,'
                    'music, movies, tv, books, games, about, quotes, can_post, can_see_all_posts, can_see_audio,'
@@ -222,7 +222,7 @@ def get_info(message):
                     data["— Relationship"]["Status"] = "In a civil union"
 
             if 'relation_partner' in get_json[0]:
-                data["— Relationship"]["Partner ID"] = "vk.com/id" + str(get_json[0]['relation_partner']['id'])
+                data["— Relationship"]["ID"] = "@id" + str(get_json[0]['relation_partner']['id'])
                 if 'first_name' and 'last_name' in get_json[0]['relation_partner']:
                     data["— Relationship"]["Name"] = get_json[0]['relation_partner']["first_name"] + ' ' + \
                                                      get_json[0]['relation_partner']["last_name"]
@@ -245,7 +245,7 @@ def get_info(message):
                         else:
                             relatives.append(i["type"].capitalize() + ":" + " no link")
                     else:
-                        relatives.append(i["type"].capitalize() + ":" + " vk.com/id" + str(i['id']))
+                        relatives.append(i["type"].capitalize() + ":" + " @id" + str(i['id']))
                 data["— Relatives"] = relatives
 
         if 'schools' in get_json[0]:
@@ -292,8 +292,8 @@ def get_info(message):
                             data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Class'] = i['class']
                     if 'speciality' in i:
                         data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Speciality'] = i['speciality']
-                    if 'type_str' in i:
-                        data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Type'] = i['type_str']
+                    # if 'type_str' in i:
+                    #     data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Type'] = i['type_str']
                     x += 1
 
         if 'career' in get_json[0]:
@@ -304,36 +304,36 @@ def get_info(message):
                 x = 0
                 for i in get_json[0]["career"]:
                     if 'group_id' in i:
-                        data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])] = {}
+                        data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])] = {}
                         if 'country_id' and 'city_id' in i:
                             country_str = get_country_str(i['country_id'])[0]['title']
                             timer()
                             city_str = get_city_str(i['city_id'])[0]['title']
                             timer()
-                            data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                            data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
                                 'Place'] = str(country_str) + ', ' + str(city_str)
                         else:
                             if 'country_id' in i:
-                                data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                                data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
                                     'Country'] = get_country_str(i['country_id'])[0]['title']
                                 timer()
                             if 'city_id' in i:
-                                data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                                data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
                                     'City'] = get_city_str(i['city_id'])[0]['title']
                                 timer()
 
                         if 'from' and 'until' in i:
-                            data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                            data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
                                 'Period'] = str(i['from']) + ' — ' + str(i['until'])
                         else:
                             if 'from' in i:
-                                data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                                data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
                                     'From'] = i['from']
                             if 'until' in i:
-                                data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])]['To'] = \
+                                data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])]['To'] = \
                                     i['until']
                         if 'position' in i:
-                            data["— Career"]["#" + str(x + 1) + ", " + 'vk.com/public' + str(i['group_id'])][
+                            data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
                                 'Position'] = i['position']
 
                     if 'company' in i:
@@ -397,8 +397,8 @@ def get_info(message):
             if "deactivated" in get_json[0]:
                 pass
             else:
-                data["— Platform"] = "vk.me/app"
-                data["— Last seen"] = "Hidden"
+                # data["— Platform"] = "vk.me/app"
+                data["— Last seen"] = "Hidden by vk.me/app"
 
         if 'status' in get_json[0]:
             if get_json[0]["status"] == "":
@@ -407,11 +407,14 @@ def get_info(message):
                 data["— Status"] = get_json[0]["status"]
 
         if 'occupation' in get_json[0]:
-            if 'name' in get_json[0]["occupation"]:
-                data['— Occupation'] = {}
+            data['— Occupation'] = {}
+            if 'name' and 'id' in get_json[0]["occupation"]:
                 data['— Occupation']["Place"] = get_json[0]["occupation"]["name"]
-            if 'type' in get_json[0]["occupation"]:
-                data['— Occupation']["Type"] = get_json[0]["occupation"]["type"]
+                data['— Occupation']['ID'] = '@public' + str(get_json[0]["occupation"]["id"])
+            else:
+                data['— Occupation']["Place"] = get_json[0]["occupation"]["name"]
+            # if 'type' in get_json[0]["occupation"]:
+            #     data['— Occupation']["Type"] = get_json[0]["occupation"]["type"]
 
         if 'screen_name' in get_json[0]:
             data["— Domain"] = get_json[0]["screen_name"]
@@ -471,94 +474,94 @@ def get_info(message):
                 data["— Quotes"] = get_json[0]["quotes"]
 
         if 'counters' in get_json[0]:
-            data["— Number of"] = {}
+            data["— Counters"] = {}
 
             if 'albums' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["albums"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Albums"] = get_json[0]["counters"]["albums"]
+                    data["— Counters"]["Albums"] = get_json[0]["counters"]["albums"]
 
             if 'videos' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["videos"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Videos"] = get_json[0]["counters"]["videos"]
+                    data["— Counters"]["Videos"] = get_json[0]["counters"]["videos"]
 
             if 'audios' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["audios"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Audios"] = get_json[0]["counters"]["audios"]
+                    data["— Counters"]["Audios"] = get_json[0]["counters"]["audios"]
 
             if 'photos' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["photos"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Photos"] = get_json[0]["counters"]["photos"]
+                    data["— Counters"]["Photos"] = get_json[0]["counters"]["photos"]
 
             if 'notes' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["notes"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Notes"] = get_json[0]["counters"]["notes"]
+                    data["— Counters"]["Notes"] = get_json[0]["counters"]["notes"]
 
             if 'friends' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["friends"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Friends"] = get_json[0]["counters"]["friends"]
+                    data["— Counters"]["Friends"] = get_json[0]["counters"]["friends"]
 
             if 'groups' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["groups"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Groups"] = get_json[0]["counters"]["groups"]
+                    data["— Counters"]["Groups"] = get_json[0]["counters"]["groups"]
 
             if 'posts' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["posts"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Posts"] = get_json[0]["counters"]["posts"]
+                    data["— Counters"]["Posts"] = get_json[0]["counters"]["posts"]
 
             if 'gifts' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["gifts"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Gifts"] = get_json[0]["counters"]["gifts"]
+                    data["— Counters"]["Gifts"] = get_json[0]["counters"]["gifts"]
 
             if 'user_videos' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["user_videos"] == 0:
                     pass
                 else:
-                    data["— Number of"]["User's tagged video"] = get_json[0]["counters"]["user_video"]
+                    data["— Counters"]["Tagged on videos"] = get_json[0]["counters"]["user_video"]
 
             if 'followers' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["followers"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Followers"] = get_json[0]["counters"]["followers"]
+                    data["— Counters"]["Followers"] = get_json[0]["counters"]["followers"]
 
             if 'user_photos' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["user_photos"] == 0:
                     pass
                 else:
-                    data["— Number of"]["User's tagged photos"] = get_json[0]["counters"]["user_photos"]
+                    data["— Counters"]["Tagged on photos"] = get_json[0]["counters"]["user_photos"]
 
             if 'subscriptions' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["subscriptions"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Subscriptions"] = get_json[0]["counters"]["subscriptions"]
+                    data["— Counters"]["Subscriptions"] = get_json[0]["counters"]["subscriptions"]
 
             if 'pages' in get_json[0]["counters"]:
                 if get_json[0]["counters"]["pages"] == 0:
                     pass
                 else:
-                    data["— Number of"]["Pages"] = get_json[0]["counters"]["pages"]
+                    data["— Counters"]["Pages"] = get_json[0]["counters"]["pages"]
 
-            if len(data["— Number of"]) == 0:
-                del data["— Number of"]
+            if len(data["— Counters"]) == 0:
+                del data["— Counters"]
 
         if 'personal' in get_json[0]:
             data["— Personal"] = {}
@@ -594,35 +597,35 @@ def get_info(message):
 
             if 'people_main' in get_json[0]["personal"]:
                 if get_json[0]["personal"]["people_main"] == 1:
-                    data["— Personal"]["People main"] = "Intellect and creativity"
+                    data["— Personal"]["People main"] = "Intellect & creativity"
                 elif get_json[0]["personal"]["people_main"] == 2:
-                    data["— Personal"]["People main"] = "Kindness and honesty"
+                    data["— Personal"]["People main"] = "Kindness & honesty"
                 elif get_json[0]["personal"]["people_main"] == 3:
-                    data["— Personal"]["People main"] = "Health and beauty"
+                    data["— Personal"]["People main"] = "Health & beauty"
                 elif get_json[0]["personal"]["people_main"] == 4:
-                    data["— Personal"]["People main"] = "Wealth and power"
+                    data["— Personal"]["People main"] = "Wealth & power"
                 elif get_json[0]["personal"]["people_main"] == 5:
-                    data["— Personal"]["People main"] = "Courage and persistance"
+                    data["— Personal"]["People main"] = "Courage & persistance"
                 elif get_json[0]["personal"]["people_main"] == 6:
-                    data["— Personal"]["People main"] = "Humor and love for life"
+                    data["— Personal"]["People main"] = "Humor & love for life"
 
             if 'life_main' in get_json[0]["personal"]:
                 if get_json[0]["personal"]["life_main"] == 1:
-                    data["— Personal"]["Life main"] = "Family and children"
+                    data["— Personal"]["Life main"] = "Family & children"
                 elif get_json[0]["personal"]["life_main"] == 2:
-                    data["— Personal"]["Life main"] = "Career and money"
+                    data["— Personal"]["Life main"] = "Career & money"
                 elif get_json[0]["personal"]["life_main"] == 3:
-                    data["— Personal"]["Life main"] = "Entertainment and leisure"
+                    data["— Personal"]["Life main"] = "Entertainment & leisure"
                 elif get_json[0]["personal"]["life_main"] == 4:
-                    data["— Personal"]["Life main"] = "Science and research"
+                    data["— Personal"]["Life main"] = "Science & research"
                 elif get_json[0]["personal"]["life_main"] == 5:
                     data["— Personal"]["Life main"] = "Improving the world"
                 elif get_json[0]["personal"]["life_main"] == 6:
                     data["— Personal"]["Life main"] = "Personal development"
                 elif get_json[0]["personal"]["life_main"] == 7:
-                    data["— Personal"]["Life main"] = "Beauty and art"
+                    data["— Personal"]["Life main"] = "Beauty & art"
                 elif get_json[0]["personal"]["life_main"] == 8:
-                    data["— Personal"]["Life main"] = "Fame and influence"
+                    data["— Personal"]["Life main"] = "Fame & influence"
 
             if 'smoking' in get_json[0]["personal"]:
                 if get_json[0]["personal"]["smoking"] == 1:
@@ -693,27 +696,27 @@ def get_info(message):
             else:
                 data["— Hometown"] = get_json[0]["home_town"]
 
-        try:
+        if 'deactivated' not in get_json[0]:
             link = settings.FOAF_LINK + str(get_json[0]['id'])
             with urllib.request.urlopen(link) as response:
                 parsed_xml = str(re.findall(r'ya:created dc:date="(.*)"', response.read().decode("windows-1251")))
-            if len(parsed_xml) > 2:
                 data["— Registered"] = parsed_xml[2:-8].replace('T', " ")
-        except:
-            pass
 
         if 'has_photo' in get_json[0]:
             if get_json[0]['has_photo'] == 0:
                 pass
             else:
-                if 'crop_photo' in get_json[0]:
-                    if 'photo' in get_json[0]["crop_photo"]:
-                        full_size_ava = max(get_json[0]["crop_photo"]["photo"]['sizes'],
-                                            key=lambda line: int(line['width']))
-                        data["— Avatar"] = full_size_ava['url']
-                    if 'date' in get_json[0]["crop_photo"]["photo"]:
-                        data["— Avatar date"] = datetime.utcfromtimestamp(
-                            get_json[0]["crop_photo"]["photo"]["date"]).strftime('%Y-%m-%d %H:%M:%S')
+                if 'crop_photo' not in get_json[0]:
+                    data["— Avatar"] = get_json[0]["photo_max_orig"]
+                else:
+                    if 'crop_photo' in get_json[0]:
+                        if 'photo' in get_json[0]["crop_photo"]:
+                            full_size_ava = max(get_json[0]["crop_photo"]["photo"]['sizes'],
+                                                key=lambda line: int(line['width']))
+                            data["— Avatar"] = full_size_ava['url']
+                        if 'date' in get_json[0]["crop_photo"]["photo"]:
+                            data["— Avatar date"] = datetime.utcfromtimestamp(
+                                get_json[0]["crop_photo"]["photo"]["date"]).strftime('%Y-%m-%d %H:%M:%S')
 
         if 'universities' in get_json[0]:
             if len(get_json[0]["universities"]) == 0:
@@ -753,7 +756,7 @@ def get_info(message):
                     if 'faculty_name' in i:
                         data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Faculty"] = i['faculty_name']
                     if 'chair_name' in i:
-                        data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Study program"] = i['chair_name']
+                        data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Program"] = i['chair_name']
                     if 'graduation' in i:
                         data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Graduation"] = i['graduation']
                     if 'education_form' in i:
