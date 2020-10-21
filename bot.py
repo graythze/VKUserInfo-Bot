@@ -1,9 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json
 import telebot
-import vk
+import requests
 import settings
 import time
 import urllib.request
@@ -14,9 +13,6 @@ from datetime import datetime
 
 bot = telebot.TeleBot(settings.TELEGRAM_TOKEN)
 
-session = vk.Session(access_token=settings.VK_TOKEN)
-api = vk.API(session, v='5.124', lang='ru', timeout=10)
-
 
 def find_at(msg):
     for text in msg:
@@ -24,19 +20,17 @@ def find_at(msg):
             return text
 
 
-def timer():
+def get_country_str(country):
     time.sleep(0.35)
-
-
-def get_country_str(*country):
-    country_str = api.database.getCountriesById(
-        country_ids=country)
+    country_str = requests.get("https://api.vk.com/method/database.getCountriesById?country_ids=" + str(country) +
+                               "&access_token=" + settings.VK_TOKEN + "&v=5.124").json()['response'][0]
     return country_str
 
 
-def get_city_str(*city):
-    city_str = api.database.getCitiesById(
-        city_ids=city)
+def get_city_str(city):
+    time.sleep(0.35)
+    city_str = requests.get("https://api.vk.com/method/database.getCitiesById?city_ids=" + str(city) +
+                            "&access_token=" + settings.VK_TOKEN + "&v=5.124").json()['response'][0]
     return city_str
 
 
@@ -65,130 +59,123 @@ def get_info(message):
             pass
         else:
             at_text = str(re.findall(r'com/(.*)', at_text))[2:-2]
-
-        get_json = api.users.get(
-            fields='verified, sex, bdate, city, country, home_town, photo_max_orig, domain, wall_comments,'
-                   'contacts, site, education, universities, schools, status, last_seen, followers_count, has_photo,'
-                   'occupation, nickname, relatives, relation, personal, connections, exports, activities, interests,'
-                   'music, movies, tv, books, games, about, quotes, can_post, can_see_all_posts, can_see_audio,'
-                   'can_write_private_message, can_send_friend_request, screen_name, maiden_name, crop_photo, career,'
-                   'can_be_invited_group, counters, military, is_closed', user_ids=at_text)
+        request = requests.get("https://api.vk.com/method/users.get?user_ids=" + at_text + "&fields=" +
+                         settings.FIELDS + "&access_token=" + settings.VK_TOKEN + "&v=5.124").json()['response'][0]
 
         data = {}
 
-        if 'id' in get_json[0]:
-            data["— ID"] = get_json[0]['id']
+        if 'id' in request:
+            data["— ID"] = request['id']
 
-        if 'first_name' and 'last_name' in get_json[0]:
-            data["— Name"] = get_json[0]['first_name'] + ' ' + get_json[0]['last_name']
+        if 'first_name' and 'last_name' in request:
+            data["— Name"] = request['first_name'] + ' ' + request['last_name']
         else:
-            if 'first_name' in get_json[0]:
-                if get_json[0]['first_name'] == "":
+            if 'first_name' in request:
+                if request['first_name'] == "":
                     pass
                 else:
-                    data["— First name"] = get_json[0]['first_name']
+                    data["— First name"] = request['first_name']
 
-            if 'last_name' in get_json[0]:
-                if get_json[0]['last_name'] == "":
+            if 'last_name' in request:
+                if request['last_name'] == "":
                     pass
                 else:
-                    data["— Last name"] = get_json[0]['last_name']
+                    data["— Last name"] = request['last_name']
 
-        if 'nickname' in get_json[0]:
-            if get_json[0]['nickname'] == "":
+        if 'nickname' in request:
+            if request['nickname'] == "":
                 pass
             else:
-                data["— Middle name"] = get_json[0]['nickname']
+                data["— Middle name"] = request['nickname']
 
-        if 'maiden_name' in get_json[0]:
-            if get_json[0]['maiden_name'] == "":
+        if 'maiden_name' in request:
+            if request['maiden_name'] == "":
                 pass
             else:
-                data["— Maiden name"] = get_json[0]['maiden_name']
+                data["— Maiden name"] = request['maiden_name']
 
-        if 'deactivated' in get_json[0]:
-            if get_json[0]['deactivated'] == "deleted":
+        if 'deactivated' in request:
+            if request['deactivated'] == "deleted":
                 data["— Page status"] = "Deleted"
             else:
                 data["— Page status"] = "Blocked"
 
-        if 'can_write_private_message' in get_json[0]:
-            if 'deactivated' in get_json[0]:
+        if 'can_write_private_message' in request:
+            if 'deactivated' in request:
                 pass
             else:
-                if get_json[0]["can_write_private_message"] == 0:
+                if request["can_write_private_message"] == 0:
                     data["— PM"] = "Not allowed"
                 else:
                     data["— PM"] = "Allowed"
 
-        if 'is_closed' in get_json[0]:
-            if not get_json[0]['is_closed']:
+        if 'is_closed' in request:
+            if not request['is_closed']:
                 data["— Page privacy"] = "Open"
-                if 'can_see_all_posts' in get_json[0]:
-                    if get_json[0]["can_see_all_posts"] == 0:
+                if 'can_see_all_posts' in request:
+                    if request["can_see_all_posts"] == 0:
                         data["— All posts"] = "Hidden"
                     else:
                         data["— All posts"] = "Visible"
 
-                if 'can_post' in get_json[0]:
-                    if 'deactivated' in get_json[0]:
+                if 'can_post' in request:
+                    if 'deactivated' in request:
                         pass
                     else:
-                        if get_json[0]["can_post"] == 0:
+                        if request["can_post"] == 0:
                             data["— Posting"] = "Not allowed"
                         else:
                             data["— Posting"] = "Allowed"
 
-                if 'can_see_audio' in get_json[0]:
-                    if get_json[0]["can_see_audio"] == 0:
+                if 'can_see_audio' in request:
+                    if request["can_see_audio"] == 0:
                         data["— Audio"] = "Hidden"
                     else:
                         data["— Audio"] = "Visible"
 
-                if 'wall_comments' in get_json[0]:
-                    if get_json[0]['wall_comments'] == 1:
+                if 'wall_comments' in request:
+                    if request['wall_comments'] == 1:
                         data["— Commenting"] = "Allowed"
                     else:
                         data["— Commenting"] = "Not allowed"
             else:
                 data["— Page privacy"] = "Closed"
 
-        if 'can_send_friend_request' in get_json[0]:
-            if get_json[0]["can_send_friend_request"] == 0:
+        if 'can_send_friend_request' in request:
+            if request["can_send_friend_request"] == 0:
                 data["— Friend request"] = "Not allowed"
             else:
                 data["— Friend request"] = "Allowed"
 
-        if 'sex' in get_json[0]:
-            if 'first_name' in get_json[0]:
-                if get_json[0]['first_name'] == "DELETED":
+        if 'sex' in request:
+            if 'first_name' in request:
+                if request['first_name'] == "DELETED":
                     pass
                 else:
-                    if get_json[0]['sex'] == 1:
+                    if request['sex'] == 1:
                         data["— Sex"] = 'Female'
-                    if get_json[0]['sex'] == 2:
+                    if request['sex'] == 2:
                         data["— Sex"] = 'Male'
 
-        if 'verified' in get_json[0]:
-            if get_json[0]['verified'] == 1:
+        if 'verified' in request:
+            if request['verified'] == 1:
                 data["— Verified"] = "Yes"
 
-        if 'bdate' in get_json[0]:
-            data["— Birthday"] = get_json[0]['bdate']
+        if 'bdate' in request:
+            data["— Birthday"] = request['bdate']
 
-        if 'military' in get_json[0]:
-            if len(get_json[0]["military"]) == 0:
+        if 'military' in request:
+            if len(request["military"]) == 0:
                 pass
             else:
                 data['— Military'] = {}
                 x = 0
-                for i in get_json[0]["military"]:
+                for i in request["military"]:
                     if 'unit' in i:
                         data["— Military"]["#" + str(x + 1) + ", " + i['unit']] = {}
                     if 'country_id' in i:
                         data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Country'] = \
-                            get_country_str(i['country_id'])[0]['title']
-                        timer()
+                            get_country_str(i['country_id'])['title']
                     if 'from' and 'until' in i:
                         data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Time'] = str(i['from']) + ' — ' + str(
                             i['until'])
@@ -199,46 +186,46 @@ def get_info(message):
                             data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Until'] = i['until']
                     x += 1
 
-        if 'relation' in get_json[0]:
-            if get_json[0]['relation'] == 0:
+        if 'relation' in request:
+            if request['relation'] == 0:
                 pass
             else:
                 data["— Relationship"] = {}
-                if get_json[0]['relation'] == 1:
+                if request['relation'] == 1:
                     data["— Relationship"]["Status"] = "Single"
-                elif get_json[0]['relation'] == 2:
+                elif request['relation'] == 2:
                     data["— Relationship"]["Status"] = "In a relationship"
-                elif get_json[0]['relation'] == 3:
+                elif request['relation'] == 3:
                     data["— Relationship"]["Status"] = "Engaged"
-                elif get_json[0]['relation'] == 4:
+                elif request['relation'] == 4:
                     data["— Relationship"]["Status"] = "Married"
-                elif get_json[0]['relation'] == 5:
+                elif request['relation'] == 5:
                     data["— Relationship"]["Status"] = "Complicated"
-                elif get_json[0]['relation'] == 6:
+                elif request['relation'] == 6:
                     data["— Relationship"]["Status"] = "Searching"
-                elif get_json[0]['relation'] == 7:
+                elif request['relation'] == 7:
                     data["— Relationship"]["Status"] = "In love"
-                elif get_json[0]['relation'] == 8:
+                elif request['relation'] == 8:
                     data["— Relationship"]["Status"] = "In a civil union"
 
-            if 'relation_partner' in get_json[0]:
-                data["— Relationship"]["ID"] = "@id" + str(get_json[0]['relation_partner']['id'])
-                if 'first_name' and 'last_name' in get_json[0]['relation_partner']:
-                    data["— Relationship"]["Name"] = get_json[0]['relation_partner']["first_name"] + ' ' + \
-                                                     get_json[0]['relation_partner']["last_name"]
+            if 'relation_partner' in request:
+                data["— Relationship"]["ID"] = "@id" + str(request['relation_partner']['id'])
+                if 'first_name' and 'last_name' in request['relation_partner']:
+                    data["— Relationship"]["Name"] = request['relation_partner']["first_name"] + ' ' + \
+                                                     request['relation_partner']["last_name"]
                 else:
-                    if 'first_name' in get_json[0]['relation_partner']:
-                        data["— Relationship"]["First name"] = get_json[0]['relation_partner']["first_name"]
-                    if 'last_name' in get_json[0]['relation_partner']:
-                        data["— Relationship"]["Last name"] = get_json[0]['relation_partner']["last_name"]
+                    if 'first_name' in request['relation_partner']:
+                        data["— Relationship"]["First name"] = request['relation_partner']["first_name"]
+                    if 'last_name' in request['relation_partner']:
+                        data["— Relationship"]["Last name"] = request['relation_partner']["last_name"]
 
-        if 'relatives' in get_json[0]:
-            if len(get_json[0]["relatives"]) == 0:
+        if 'relatives' in request:
+            if len(request["relatives"]) == 0:
                 pass
             else:
                 data["— Relatives"] = {}
                 relatives = []
-                for i in get_json[0]["relatives"]:
+                for i in request["relatives"]:
                     if i["id"] < 0:
                         if 'id' and 'name' in i:
                             relatives.append(i["type"].capitalize() + ": " + i['name'])
@@ -248,32 +235,28 @@ def get_info(message):
                         relatives.append(i["type"].capitalize() + ":" + " @id" + str(i['id']))
                 data["— Relatives"] = relatives
 
-        if 'schools' in get_json[0]:
-            if len(get_json[0]["schools"]) == 0:
+        if 'schools' in request:
+            if len(request["schools"]) == 0:
                 pass
             else:
                 data['— Schools'] = {}
                 x = 0
-                for i in get_json[0]["schools"]:
+                for i in request["schools"]:
                     if 'name' in i:
                         data['— Schools']["#" + str(x + 1) + ", " + i['name']] = {}
 
                     if 'country' and 'city' in i:
-                        country_str = get_country_str(i['country'])[0]['title']
-                        timer()
-                        city_str = get_city_str(i['city'])[0]['title']
-                        timer()
+                        country_str = get_country_str(i['country'])['title']
+                        city_str = get_city_str(i['city'])['title']
                         data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Place'] = str(country_str) + ', ' + str(
                             city_str)
                     else:
                         if 'country' in i:
                             data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Country'] = \
-                                get_country_str(i['country'])[0]['title']
-                            timer()
+                                get_country_str(i['country'])['title']
                         if 'city' in i:
-                            data['— Schools']["#" + str(x + 1) + ", " + i['name']]['City'] = get_city_str(i['city'])[0][
+                            data['— Schools']["#" + str(x + 1) + ", " + i['name']]['City'] = get_city_str(i['city'])[
                                 'title']
-                            timer()
 
                     if 'year_from' and 'year_to' in i:
                         data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Studying'] = str(
@@ -296,31 +279,27 @@ def get_info(message):
                     #     data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Type'] = i['type_str']
                     x += 1
 
-        if 'career' in get_json[0]:
-            if len(get_json[0]["career"]) == 0:
+        if 'career' in request:
+            if len(request["career"]) == 0:
                 pass
             else:
                 data["— Career"] = {}
                 x = 0
-                for i in get_json[0]["career"]:
+                for i in request["career"]:
                     if 'group_id' in i:
                         data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])] = {}
                         if 'country_id' and 'city_id' in i:
-                            country_str = get_country_str(i['country_id'])[0]['title']
-                            timer()
-                            city_str = get_city_str(i['city_id'])[0]['title']
-                            timer()
+                            country_str = get_country_str(i['country_id'])['title']
+                            city_str = get_city_str(i['city_id'])['title']
                             data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
                                 'Place'] = str(country_str) + ', ' + str(city_str)
                         else:
                             if 'country_id' in i:
                                 data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
-                                    'Country'] = get_country_str(i['country_id'])[0]['title']
-                                timer()
+                                    'Country'] = get_country_str(i['country_id'])['title']
                             if 'city_id' in i:
                                 data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
-                                    'City'] = get_city_str(i['city_id'])[0]['title']
-                                timer()
+                                    'City'] = get_city_str(i['city_id'])['title']
 
                         if 'from' and 'until' in i:
                             data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
@@ -340,21 +319,17 @@ def get_info(message):
                         data["— Career"]["#" + str(x + 1) + ", " + i['company']] = {}
 
                         if 'country_id' and 'city_id' in i:
-                            country_str = get_country_str(i['country_id'])[0]['title']
-                            timer()
-                            city_str = get_city_str(i['city_id'])[0]['title']
-                            timer()
+                            country_str = get_country_str(i['country_id'])['title']
+                            city_str = get_city_str(i['city_id'])['title']
                             data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Place'] = str(
                                 country_str) + ', ' + str(city_str)
                         else:
                             if 'country_id' in i:
                                 data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Country'] = \
-                                    get_country_str(i['country_id'])[0]['title']
-                                timer()
+                                    get_country_str(i['country_id'])['title']
                             if 'city_id' in i:
                                 data["— Career"]["#" + str(x + 1) + ", " + i['company']]['City'] = \
-                                    get_city_str(i['city_id'])[0]['title']
-                                timer()
+                                    get_city_str(i['city_id'])['title']
 
                         if 'from' and 'until' in i:
                             data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Period'] = str(
@@ -368,373 +343,371 @@ def get_info(message):
                             data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Position'] = i['position']
                     x += 1
 
-        if 'site' in get_json[0]:
-            if get_json[0]['site'] == "":
+        if 'site' in request:
+            if request['site'] == "":
                 pass
             else:
-                data["— Site"] = get_json[0]["site"]
+                data["— Site"] = request["site"]
 
-        if 'last_seen' in get_json[0]:
-            if 'time' in get_json[0]["last_seen"]:
-                data["— Last seen"] = datetime.utcfromtimestamp(get_json[0]["last_seen"]["time"]).strftime(
+        if 'last_seen' in request:
+            if 'time' in request["last_seen"]:
+                data["— Last seen"] = datetime.utcfromtimestamp(request["last_seen"]["time"]).strftime(
                     '%Y-%m-%d %H:%M:%S')
-            if 'platform' in get_json[0]["last_seen"]:
-                if get_json[0]["last_seen"]["platform"] == 1:
+            if 'platform' in request["last_seen"]:
+                if request["last_seen"]["platform"] == 1:
                     data["— Platform"] = "m.vk.com"
-                if get_json[0]["last_seen"]["platform"] == 2:
+                if request["last_seen"]["platform"] == 2:
                     data["— Platform"] = "iPhone"
-                if get_json[0]["last_seen"]["platform"] == 3:
+                if request["last_seen"]["platform"] == 3:
                     data["— Platform"] = "iPad"
-                if get_json[0]["last_seen"]["platform"] == 4:
+                if request["last_seen"]["platform"] == 4:
                     data["— Platform"] = "Android"
-                if get_json[0]["last_seen"]["platform"] == 5:
+                if request["last_seen"]["platform"] == 5:
                     data["— Platform"] = "Windows Phone"
-                if get_json[0]["last_seen"]["platform"] == 6:
+                if request["last_seen"]["platform"] == 6:
                     data["— Platform"] = "Windows 8"
-                if get_json[0]["last_seen"]["platform"] == 7:
+                if request["last_seen"]["platform"] == 7:
                     data["— Platform"] = "vk.com"
         else:
-            if "deactivated" in get_json[0]:
+            if "deactivated" in request:
                 pass
             else:
                 # data["— Platform"] = "vk.me/app"
                 data["— Last seen"] = "Hidden by vk.me/app"
 
-        if 'status' in get_json[0]:
-            if get_json[0]["status"] == "":
+        if 'status' in request:
+            if request["status"] == "":
                 pass
             else:
-                data["— Status"] = get_json[0]["status"]
+                data["— Status"] = request["status"]
 
-        if 'occupation' in get_json[0]:
+        if 'occupation' in request:
             data['— Occupation'] = {}
-            if 'name' and 'id' in get_json[0]["occupation"]:
-                data['— Occupation']["Place"] = get_json[0]["occupation"]["name"]
-                data['— Occupation']['ID'] = '@public' + str(get_json[0]["occupation"]["id"])
+            if 'name' and 'id' in request["occupation"]:
+                data['— Occupation']["Place"] = request["occupation"]["name"]
+                data['— Occupation']['ID'] = '@public' + str(request["occupation"]["id"])
             else:
-                data['— Occupation']["Place"] = get_json[0]["occupation"]["name"]
-            # if 'type' in get_json[0]["occupation"]:
-            #     data['— Occupation']["Type"] = get_json[0]["occupation"]["type"]
+                data['— Occupation']["Place"] = request["occupation"]["name"]
+            # if 'type' in request["occupation"]:
+            #     data['— Occupation']["Type"] = request["occupation"]["type"]
 
-        if 'screen_name' in get_json[0]:
-            data["— Domain"] = get_json[0]["screen_name"]
+        if 'screen_name' in request:
+            data["— Domain"] = request["screen_name"]
 
-        if 'activities' in get_json[0]:
-            if get_json[0]["activities"] == "":
+        if 'activities' in request:
+            if request["activities"] == "":
                 pass
             else:
-                data["— Activities"] = get_json[0]["activities"]
+                data["— Activities"] = request["activities"]
 
-        if 'interests' in get_json[0]:
-            if get_json[0]["interests"] == "":
+        if 'interests' in request:
+            if request["interests"] == "":
                 pass
             else:
-                data["— Interests"] = get_json[0]["interests"]
+                data["— Interests"] = request["interests"]
 
-        if 'music' in get_json[0]:
-            if get_json[0]["music"] == "":
+        if 'music' in request:
+            if request["music"] == "":
                 pass
             else:
-                data["— Music"] = get_json[0]["music"]
+                data["— Music"] = request["music"]
 
-        if 'movies' in get_json[0]:
-            if get_json[0]["movies"] == "":
+        if 'movies' in request:
+            if request["movies"] == "":
                 pass
             else:
-                data["— Movies"] = get_json[0]["movies"]
+                data["— Movies"] = request["movies"]
 
-        if 'tv' in get_json[0]:
-            if get_json[0]["tv"] == "":
+        if 'tv' in request:
+            if request["tv"] == "":
                 pass
             else:
-                data["— TV"] = get_json[0]["tv"]
+                data["— TV"] = request["tv"]
 
-        if 'books' in get_json[0]:
-            if get_json[0]["books"] == "":
+        if 'books' in request:
+            if request["books"] == "":
                 pass
             else:
-                data["— Books"] = get_json[0]["books"]
+                data["— Books"] = request["books"]
 
-        if 'games' in get_json[0]:
-            if get_json[0]["games"] == "":
+        if 'games' in request:
+            if request["games"] == "":
                 pass
             else:
-                data["— Games"] = get_json[0]["games"]
+                data["— Games"] = request["games"]
 
-        if 'about' in get_json[0]:
-            if get_json[0]["about"] == "":
+        if 'about' in request:
+            if request["about"] == "":
                 pass
             else:
-                data["— About"] = get_json[0]["about"]
+                data["— About"] = request["about"]
 
-        if 'quotes' in get_json[0]:
-            if get_json[0]["quotes"] == "":
+        if 'quotes' in request:
+            if request["quotes"] == "":
                 pass
             else:
-                data["— Quotes"] = get_json[0]["quotes"]
+                data["— Quotes"] = request["quotes"]
 
-        if 'counters' in get_json[0]:
+        if 'counters' in request:
             data["— Counters"] = {}
 
-            if 'albums' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["albums"] == 0:
+            if 'albums' in request["counters"]:
+                if request["counters"]["albums"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Albums"] = get_json[0]["counters"]["albums"]
+                    data["— Counters"]["Albums"] = request["counters"]["albums"]
 
-            if 'videos' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["videos"] == 0:
+            if 'videos' in request["counters"]:
+                if request["counters"]["videos"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Videos"] = get_json[0]["counters"]["videos"]
+                    data["— Counters"]["Videos"] = request["counters"]["videos"]
 
-            if 'audios' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["audios"] == 0:
+            if 'audios' in request["counters"]:
+                if request["counters"]["audios"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Audios"] = get_json[0]["counters"]["audios"]
+                    data["— Counters"]["Audios"] = request["counters"]["audios"]
 
-            if 'photos' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["photos"] == 0:
+            if 'photos' in request["counters"]:
+                if request["counters"]["photos"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Photos"] = get_json[0]["counters"]["photos"]
+                    data["— Counters"]["Photos"] = request["counters"]["photos"]
 
-            if 'notes' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["notes"] == 0:
+            if 'notes' in request["counters"]:
+                if request["counters"]["notes"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Notes"] = get_json[0]["counters"]["notes"]
+                    data["— Counters"]["Notes"] = request["counters"]["notes"]
 
-            if 'friends' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["friends"] == 0:
+            if 'friends' in request["counters"]:
+                if request["counters"]["friends"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Friends"] = get_json[0]["counters"]["friends"]
+                    data["— Counters"]["Friends"] = request["counters"]["friends"]
 
-            if 'groups' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["groups"] == 0:
+            if 'groups' in request["counters"]:
+                if request["counters"]["groups"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Groups"] = get_json[0]["counters"]["groups"]
+                    data["— Counters"]["Groups"] = request["counters"]["groups"]
 
-            if 'posts' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["posts"] == 0:
+            if 'posts' in request["counters"]:
+                if request["counters"]["posts"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Posts"] = get_json[0]["counters"]["posts"]
+                    data["— Counters"]["Posts"] = request["counters"]["posts"]
 
-            if 'gifts' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["gifts"] == 0:
+            if 'gifts' in request["counters"]:
+                if request["counters"]["gifts"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Gifts"] = get_json[0]["counters"]["gifts"]
+                    data["— Counters"]["Gifts"] = request["counters"]["gifts"]
 
-            if 'user_videos' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["user_videos"] == 0:
+            if 'user_videos' in request["counters"]:
+                if request["counters"]["user_videos"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Tagged on videos"] = get_json[0]["counters"]["user_video"]
+                    data["— Counters"]["Tagged on videos"] = request["counters"]["user_video"]
 
-            if 'followers' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["followers"] == 0:
+            if 'followers' in request["counters"]:
+                if request["counters"]["followers"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Followers"] = get_json[0]["counters"]["followers"]
+                    data["— Counters"]["Followers"] = request["counters"]["followers"]
 
-            if 'user_photos' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["user_photos"] == 0:
+            if 'user_photos' in request["counters"]:
+                if request["counters"]["user_photos"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Tagged on photos"] = get_json[0]["counters"]["user_photos"]
+                    data["— Counters"]["Tagged on photos"] = request["counters"]["user_photos"]
 
-            if 'subscriptions' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["subscriptions"] == 0:
+            if 'subscriptions' in request["counters"]:
+                if request["counters"]["subscriptions"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Subscriptions"] = get_json[0]["counters"]["subscriptions"]
+                    data["— Counters"]["Subscriptions"] = request["counters"]["subscriptions"]
 
-            if 'pages' in get_json[0]["counters"]:
-                if get_json[0]["counters"]["pages"] == 0:
+            if 'pages' in request["counters"]:
+                if request["counters"]["pages"] == 0:
                     pass
                 else:
-                    data["— Counters"]["Pages"] = get_json[0]["counters"]["pages"]
+                    data["— Counters"]["Pages"] = request["counters"]["pages"]
 
             if len(data["— Counters"]) == 0:
                 del data["— Counters"]
 
-        if 'personal' in get_json[0]:
+        if 'personal' in request:
             data["— Personal"] = {}
-            if 'political' in get_json[0]["personal"]:
-                if get_json[0]["personal"]["political"] == 1:
+            if 'political' in request["personal"]:
+                if request["personal"]["political"] == 1:
                     data["— Personal"]["Political"] = "Communist"
-                elif get_json[0]["personal"]["political"] == 2:
+                elif request["personal"]["political"] == 2:
                     data["— Personal"]["Political"] = "Socialist"
-                elif get_json[0]["personal"]["political"] == 3:
+                elif request["personal"]["political"] == 3:
                     data["— Personal"]["Political"] = "Moderate"
-                elif get_json[0]["personal"]["political"] == 4:
+                elif request["personal"]["political"] == 4:
                     data["— Personal"]["Political"] = "Liberal"
-                elif get_json[0]["personal"]["political"] == 5:
+                elif request["personal"]["political"] == 5:
                     data["— Personal"]["Political"] = "Conservative"
-                elif get_json[0]["personal"]["political"] == 6:
+                elif request["personal"]["political"] == 6:
                     data["— Personal"]["Political"] = "Monarchist"
-                elif get_json[0]["personal"]["political"] == 7:
+                elif request["personal"]["political"] == 7:
                     data["— Personal"]["Political"] = "Ultraconservative"
-                elif get_json[0]["personal"]["political"] == 8:
+                elif request["personal"]["political"] == 8:
                     data["— Personal"]["Political"] = "Apathetic"
-                elif get_json[0]["personal"]["political"] == 9:
-                    data["— Personal"]["Political"] = "Libertian"
+                elif request["personal"]["political"] == 9:
+                    data["— Personal"]["Political"] = "Libertarian"
 
-            if 'langs' in get_json[0]["personal"]:
-                langs = ', '.join(map(str, get_json[0]["personal"]["langs"]))
+            if 'langs' in request["personal"]:
+                langs = ', '.join(map(str, request["personal"]["langs"]))
                 data["— Personal"]["Languages"] = langs
 
-            if 'religion' in get_json[0]["personal"]:
-                data["— Personal"]["Religion"] = get_json[0]["personal"]["religion"]
+            if 'religion' in request["personal"]:
+                data["— Personal"]["Religion"] = request["personal"]["religion"]
 
-            if 'inspired_by' in get_json[0]["personal"]:
-                data["— Personal"]["Inspired by"] = get_json[0]["personal"]["inspired_by"]
+            if 'inspired_by' in request["personal"]:
+                data["— Personal"]["Inspired by"] = request["personal"]["inspired_by"]
 
-            if 'people_main' in get_json[0]["personal"]:
-                if get_json[0]["personal"]["people_main"] == 1:
+            if 'people_main' in request["personal"]:
+                if request["personal"]["people_main"] == 1:
                     data["— Personal"]["People main"] = "Intellect & creativity"
-                elif get_json[0]["personal"]["people_main"] == 2:
+                elif request["personal"]["people_main"] == 2:
                     data["— Personal"]["People main"] = "Kindness & honesty"
-                elif get_json[0]["personal"]["people_main"] == 3:
+                elif request["personal"]["people_main"] == 3:
                     data["— Personal"]["People main"] = "Health & beauty"
-                elif get_json[0]["personal"]["people_main"] == 4:
+                elif request["personal"]["people_main"] == 4:
                     data["— Personal"]["People main"] = "Wealth & power"
-                elif get_json[0]["personal"]["people_main"] == 5:
+                elif request["personal"]["people_main"] == 5:
                     data["— Personal"]["People main"] = "Courage & persistance"
-                elif get_json[0]["personal"]["people_main"] == 6:
+                elif request["personal"]["people_main"] == 6:
                     data["— Personal"]["People main"] = "Humor & love for life"
 
-            if 'life_main' in get_json[0]["personal"]:
-                if get_json[0]["personal"]["life_main"] == 1:
+            if 'life_main' in request["personal"]:
+                if request["personal"]["life_main"] == 1:
                     data["— Personal"]["Life main"] = "Family & children"
-                elif get_json[0]["personal"]["life_main"] == 2:
+                elif request["personal"]["life_main"] == 2:
                     data["— Personal"]["Life main"] = "Career & money"
-                elif get_json[0]["personal"]["life_main"] == 3:
+                elif request["personal"]["life_main"] == 3:
                     data["— Personal"]["Life main"] = "Entertainment & leisure"
-                elif get_json[0]["personal"]["life_main"] == 4:
+                elif request["personal"]["life_main"] == 4:
                     data["— Personal"]["Life main"] = "Science & research"
-                elif get_json[0]["personal"]["life_main"] == 5:
+                elif request["personal"]["life_main"] == 5:
                     data["— Personal"]["Life main"] = "Improving the world"
-                elif get_json[0]["personal"]["life_main"] == 6:
+                elif request["personal"]["life_main"] == 6:
                     data["— Personal"]["Life main"] = "Personal development"
-                elif get_json[0]["personal"]["life_main"] == 7:
+                elif request["personal"]["life_main"] == 7:
                     data["— Personal"]["Life main"] = "Beauty & art"
-                elif get_json[0]["personal"]["life_main"] == 8:
+                elif request["personal"]["life_main"] == 8:
                     data["— Personal"]["Life main"] = "Fame & influence"
 
-            if 'smoking' in get_json[0]["personal"]:
-                if get_json[0]["personal"]["smoking"] == 1:
+            if 'smoking' in request["personal"]:
+                if request["personal"]["smoking"] == 1:
                     data["— Personal"]["Smoking"] = "Very negative"
-                elif get_json[0]["personal"]["smoking"] == 2:
+                elif request["personal"]["smoking"] == 2:
                     data["— Personal"]["Smoking"] = "Negative"
-                elif get_json[0]["personal"]["smoking"] == 3:
+                elif request["personal"]["smoking"] == 3:
                     data["— Personal"]["Smoking"] = "Neutral"
-                elif get_json[0]["personal"]["smoking"] == 4:
+                elif request["personal"]["smoking"] == 4:
                     data["— Personal"]["Smoking"] = "Compromisable"
-                elif get_json[0]["personal"]["smoking"] == 5:
+                elif request["personal"]["smoking"] == 5:
                     data["— Personal"]["Smoking"] = "Positive"
 
-            if 'alcohol' in get_json[0]["personal"]:
-                if get_json[0]["personal"]["alcohol"] == 1:
+            if 'alcohol' in request["personal"]:
+                if request["personal"]["alcohol"] == 1:
                     data["— Personal"]["Alcohol"] = "Very negative"
-                elif get_json[0]["personal"]["alcohol"] == 2:
+                elif request["personal"]["alcohol"] == 2:
                     data["— Personal"]["Alcohol"] = "Negative"
-                elif get_json[0]["personal"]["alcohol"] == 3:
+                elif request["personal"]["alcohol"] == 3:
                     data["— Personal"]["Alcohol"] = "Neutral"
-                elif get_json[0]["personal"]["alcohol"] == 4:
+                elif request["personal"]["alcohol"] == 4:
                     data["— Personal"]["Alcohol"] = "Compromisable"
-                elif get_json[0]["personal"]["alcohol"] == 5:
+                elif request["personal"]["alcohol"] == 5:
                     data["— Personal"]["Alcohol"] = "Positive"
 
-        if 'mobile_phone' in get_json[0]:
-            if len(get_json[0]["mobile_phone"]) == 0:
+        if 'mobile_phone' in request:
+            if len(request["mobile_phone"]) == 0:
                 pass
             else:
-                data["— Mobile"] = get_json[0]["mobile_phone"]
+                data["— Mobile"] = request["mobile_phone"]
 
-        if 'home_phone' in get_json[0]:
-            if len(get_json[0]["home_phone"]) == 0:
+        if 'home_phone' in request:
+            if len(request["home_phone"]) == 0:
                 pass
             else:
-                data["— Home phone"] = get_json[0]["home_phone"]
+                data["— Home phone"] = request["home_phone"]
 
-        if 'skype' in get_json[0]:
-            data["— Skype"] = get_json[0]["skype"]
+        if 'skype' in request:
+            data["— Skype"] = request["skype"]
 
-        if 'instagram' in get_json[0]:
-            data["— Instagram"] = "@" + get_json[0]["instagram"]
+        if 'instagram' in request:
+            data["— Instagram"] = "@" + request["instagram"]
 
-        if 'twitter' in get_json[0]:
-            data["— Twitter"] = "@" + get_json[0]["twitter"]
+        if 'twitter' in request:
+            data["— Twitter"] = "@" + request["twitter"]
 
-        if 'livejournal' in get_json[0]:
-            data["— LiveJournal"] = "@" + get_json[0]["livejournal"]
+        if 'livejournal' in request:
+            data["— LiveJournal"] = "@" + request["livejournal"]
 
-        if 'facebook' in get_json[0]:
-            data["— Facebook"] = "facebook.com/profile.php?id=" + get_json[0]["facebook"]
+        if 'facebook' in request:
+            data["— Facebook"] = "facebook.com/profile.php?id=" + request["facebook"]
 
-        if 'country' and 'city' in get_json[0]:
-            if 'title' in get_json[0]["country"] and 'title' in get_json[0]["city"]:
-                data["— Location"] = get_json[0]["country"]["title"] + ', ' + get_json[0]["city"]["title"]
+        if 'country' and 'city' in request:
+            if 'title' in request["country"] and 'title' in request["city"]:
+                data["— Location"] = request["country"]["title"] + ', ' + request["city"]["title"]
         else:
-            if 'country' in get_json[0]:
-                if 'title' in get_json[0]["country"]:
-                    data["— Country"] = get_json[0]["country"]["title"]
+            if 'country' in request:
+                if 'title' in request["country"]:
+                    data["— Country"] = request["country"]["title"]
 
-            if 'city' in get_json[0]:
-                if 'title' in get_json[0]["city"]:
-                    data["— City"] = get_json[0]["city"]["title"]
+            if 'city' in request:
+                if 'title' in request["city"]:
+                    data["— City"] = request["city"]["title"]
 
-        if 'home_town' in get_json[0]:
-            if get_json[0]["home_town"] == "":
+        if 'home_town' in request:
+            if request["home_town"] == "":
                 pass
             else:
-                data["— Hometown"] = get_json[0]["home_town"]
+                data["— Hometown"] = request["home_town"]
 
-        if 'deactivated' not in get_json[0]:
-            link = settings.FOAF_LINK + str(get_json[0]['id'])
+        if 'deactivated' not in request:
+            link = settings.FOAF_LINK + str(request['id'])
             with urllib.request.urlopen(link) as response:
                 parsed_xml = str(re.findall(r'ya:created dc:date="(.*)"', response.read().decode("windows-1251")))
                 data["— Registered"] = parsed_xml[2:-8].replace('T', " ")
 
-        if 'has_photo' in get_json[0]:
-            if get_json[0]['has_photo'] == 0:
+        if 'has_photo' in request:
+            if request['has_photo'] == 0:
                 pass
             else:
-                if 'crop_photo' not in get_json[0]:
-                    data["— Avatar"] = get_json[0]["photo_max_orig"]
+                if 'crop_photo' not in request:
+                    data["— Avatar"] = request["photo_max_orig"]
                 else:
-                    if 'crop_photo' in get_json[0]:
-                        if 'photo' in get_json[0]["crop_photo"]:
-                            full_size_ava = max(get_json[0]["crop_photo"]["photo"]['sizes'],
+                    if 'crop_photo' in request:
+                        if 'photo' in request["crop_photo"]:
+                            full_size_ava = max(request["crop_photo"]["photo"]['sizes'],
                                                 key=lambda line: int(line['width']))
                             data["— Avatar"] = full_size_ava['url']
-                        if 'date' in get_json[0]["crop_photo"]["photo"]:
+                        if 'date' in request["crop_photo"]["photo"]:
                             data["— Avatar date"] = datetime.utcfromtimestamp(
-                                get_json[0]["crop_photo"]["photo"]["date"]).strftime('%Y-%m-%d %H:%M:%S')
+                                request["crop_photo"]["photo"]["date"]).strftime('%Y-%m-%d %H:%M:%S')
 
-        if 'universities' in get_json[0]:
-            if len(get_json[0]["universities"]) == 0:
+        if 'universities' in request:
+            if len(request["universities"]) == 0:
                 pass
             else:
                 data["— Education"] = {}
                 x = 0
-                for i in get_json[0]["universities"]:
+                for i in request["universities"]:
                     if 'name' in i:
                         data["— Education"]["#" + str(x + 1) + ", " + i['name']] = {}
                     if 'country' and 'city' in i:
                         if i['country'] == 0 and i['city'] == 0:
                             pass
                         else:
-                            country_str = get_country_str(i['country'])[0]['title']
-                            timer()
-                            city_str = get_city_str(i['city'])[0]['title']
-                            timer()
+                            country_str = get_country_str(i['country'])['title']
+                            city_str = get_city_str(i['city'])['title']
                             data["— Education"]["#" + str(x + 1) + ", " + i['name']][
                                 "Place"] = country_str + ', ' + city_str
                     else:
@@ -743,15 +716,13 @@ def get_info(message):
                                 pass
                             else:
                                 data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Country"] = \
-                                    get_country_str(i['country'])[0]['title']
-                                timer()
+                                    get_country_str(i['country'])['title']
                         if 'city' in i:
                             if i['city'] == 0:
                                 pass
                             else:
                                 data["— Education"]["#" + str(x + 1) + ", " + i['name']]["City"] = \
-                                    get_city_str(i['city'])[0]['title']
-                                timer()
+                                    get_city_str(i['city'])['title']
 
                     if 'faculty_name' in i:
                         data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Faculty"] = i['faculty_name']

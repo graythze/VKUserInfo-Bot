@@ -1,7 +1,7 @@
 # 📄 VK User Info Bot
 Telegram bot which uses VK API [users.get][1] method to get detailed information about user by ID.
 
-Built by [pyTelegramBotAPI][5] and [vk][6]
+Built by [pyTelegramBotAPI][5] and [requests][6]
 
 Bot avaiable at [@VKUserInfo_bot][4]
 
@@ -24,5 +24,5 @@ While getting access token, use [all permissions][7] for better working bot
 [3]: https://vk.com/dev/implicit_flow_user?f=3.%20Receiving%20access_token "Implicit Flow for User Access Token"
 [4]: https://telegram.me/VKUserInfo_bot "@VKUserInfo_bot"
 [5]: https://github.com/eternnoir/pyTelegramBotAPI "pyTelegramBotAPI at Github"
-[6]: https://github.com/voronind/vk "VK library at Github"
+[6]: https://github.com/psf/requests "Requests lib at Github"
 [7]: https://vk.com/dev/permissions?f=1.%20Access%20Permissions%20for%20User%20Token "Access Permissions for User Token"
