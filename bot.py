@@ -37,15 +37,15 @@ def get_city_str(city):
 @bot.message_handler(commands=['start'])
 def regular_message(message):
     bot.send_message(message.from_user.id, "<b>Welcome to bot! 🤖</b>\n"
-                                           "\nPlease send the user's ID page 🔎"
+                                           "\nPlease send the page user ID 🔎"
                                            '\n(eg. "<b>durov</b>" or "<b>id1</b>")', parse_mode="HTML")
 
 
 @bot.message_handler(commands=['help'])
 def help_message(message):
-    bot.send_message(message.from_user.id, "Bot collects all main information (if available) from user's page."
+    bot.send_message(message.from_user.id, "Bot collects all main information (if available) from user page."
                                            "To start, send a text message with ID to get info about the user.\n"
-                                           "\n<b>DISCLAIMER: All data is taken from public sources by VK API's"
+                                           "\n<b>DISCLAIMER: All data is taken from public sources by VK API's "
                                            "users.get Method.</b> "
                                            "\n<b>More at vk.com/dev/users.get</b>", parse_mode="HTML")
 
@@ -449,182 +449,185 @@ def get_info(message):
                 data["— Quotes"] = request["quotes"]
 
         if 'counters' in request:
-            data["— Counters"] = {}
+            if len(request["counters"]) == 0:
+                pass
+            else:
+                data["— Counters"] = {}
 
-            if 'albums' in request["counters"]:
-                if request["counters"]["albums"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Albums"] = request["counters"]["albums"]
+                if 'albums' in request["counters"]:
+                    if request["counters"]["albums"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Albums"] = request["counters"]["albums"]
 
-            if 'videos' in request["counters"]:
-                if request["counters"]["videos"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Videos"] = request["counters"]["videos"]
+                if 'videos' in request["counters"]:
+                    if request["counters"]["videos"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Videos"] = request["counters"]["videos"]
 
-            if 'audios' in request["counters"]:
-                if request["counters"]["audios"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Audios"] = request["counters"]["audios"]
+                if 'audios' in request["counters"]:
+                    if request["counters"]["audios"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Audios"] = request["counters"]["audios"]
 
-            if 'photos' in request["counters"]:
-                if request["counters"]["photos"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Photos"] = request["counters"]["photos"]
+                if 'photos' in request["counters"]:
+                    if request["counters"]["photos"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Photos"] = request["counters"]["photos"]
 
-            if 'notes' in request["counters"]:
-                if request["counters"]["notes"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Notes"] = request["counters"]["notes"]
+                if 'notes' in request["counters"]:
+                    if request["counters"]["notes"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Notes"] = request["counters"]["notes"]
 
-            if 'friends' in request["counters"]:
-                if request["counters"]["friends"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Friends"] = request["counters"]["friends"]
+                if 'friends' in request["counters"]:
+                    if request["counters"]["friends"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Friends"] = request["counters"]["friends"]
 
-            if 'groups' in request["counters"]:
-                if request["counters"]["groups"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Groups"] = request["counters"]["groups"]
+                if 'groups' in request["counters"]:
+                    if request["counters"]["groups"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Groups"] = request["counters"]["groups"]
 
-            if 'posts' in request["counters"]:
-                if request["counters"]["posts"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Posts"] = request["counters"]["posts"]
+                if 'posts' in request["counters"]:
+                    if request["counters"]["posts"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Posts"] = request["counters"]["posts"]
 
-            if 'gifts' in request["counters"]:
-                if request["counters"]["gifts"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Gifts"] = request["counters"]["gifts"]
+                if 'gifts' in request["counters"]:
+                    if request["counters"]["gifts"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Gifts"] = request["counters"]["gifts"]
 
-            if 'user_videos' in request["counters"]:
-                if request["counters"]["user_videos"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Tagged on videos"] = request["counters"]["user_video"]
+                if 'user_videos' in request["counters"]:
+                    if request["counters"]["user_videos"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Tagged on videos"] = request["counters"]["user_video"]
 
-            if 'followers' in request["counters"]:
-                if request["counters"]["followers"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Followers"] = request["counters"]["followers"]
+                if 'followers' in request["counters"]:
+                    if request["counters"]["followers"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Followers"] = request["counters"]["followers"]
 
-            if 'user_photos' in request["counters"]:
-                if request["counters"]["user_photos"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Tagged on photos"] = request["counters"]["user_photos"]
+                if 'user_photos' in request["counters"]:
+                    if request["counters"]["user_photos"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Tagged on photos"] = request["counters"]["user_photos"]
 
-            if 'subscriptions' in request["counters"]:
-                if request["counters"]["subscriptions"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Subscriptions"] = request["counters"]["subscriptions"]
+                if 'subscriptions' in request["counters"]:
+                    if request["counters"]["subscriptions"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Subscriptions"] = request["counters"]["subscriptions"]
 
-            if 'pages' in request["counters"]:
-                if request["counters"]["pages"] == 0:
-                    pass
-                else:
-                    data["— Counters"]["Pages"] = request["counters"]["pages"]
-
-            if len(data["— Counters"]) == 0:
-                del data["— Counters"]
+                if 'pages' in request["counters"]:
+                    if request["counters"]["pages"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Pages"] = request["counters"]["pages"]
 
         if 'personal' in request:
-            data["— Personal"] = {}
-            if 'political' in request["personal"]:
-                if request["personal"]["political"] == 1:
-                    data["— Personal"]["Political"] = "Communist"
-                elif request["personal"]["political"] == 2:
-                    data["— Personal"]["Political"] = "Socialist"
-                elif request["personal"]["political"] == 3:
-                    data["— Personal"]["Political"] = "Moderate"
-                elif request["personal"]["political"] == 4:
-                    data["— Personal"]["Political"] = "Liberal"
-                elif request["personal"]["political"] == 5:
-                    data["— Personal"]["Political"] = "Conservative"
-                elif request["personal"]["political"] == 6:
-                    data["— Personal"]["Political"] = "Monarchist"
-                elif request["personal"]["political"] == 7:
-                    data["— Personal"]["Political"] = "Ultraconservative"
-                elif request["personal"]["political"] == 8:
-                    data["— Personal"]["Political"] = "Apathetic"
-                elif request["personal"]["political"] == 9:
-                    data["— Personal"]["Political"] = "Libertarian"
+            if len(request['personal']) == 0:
+                pass
+            else:
+                data["— Personal"] = {}
+                if 'political' in request["personal"]:
+                    if request["personal"]["political"] == 1:
+                        data["— Personal"]["Political"] = "Communist"
+                    elif request["personal"]["political"] == 2:
+                        data["— Personal"]["Political"] = "Socialist"
+                    elif request["personal"]["political"] == 3:
+                        data["— Personal"]["Political"] = "Moderate"
+                    elif request["personal"]["political"] == 4:
+                        data["— Personal"]["Political"] = "Liberal"
+                    elif request["personal"]["political"] == 5:
+                        data["— Personal"]["Political"] = "Conservative"
+                    elif request["personal"]["political"] == 6:
+                        data["— Personal"]["Political"] = "Monarchist"
+                    elif request["personal"]["political"] == 7:
+                        data["— Personal"]["Political"] = "Ultraconservative"
+                    elif request["personal"]["political"] == 8:
+                        data["— Personal"]["Political"] = "Apathetic"
+                    elif request["personal"]["political"] == 9:
+                        data["— Personal"]["Political"] = "Libertarian"
 
-            if 'langs' in request["personal"]:
-                langs = ', '.join(map(str, request["personal"]["langs"]))
-                data["— Personal"]["Languages"] = langs
+                if 'langs' in request["personal"]:
+                    langs = ', '.join(map(str, request["personal"]["langs"]))
+                    data["— Personal"]["Languages"] = langs
 
-            if 'religion' in request["personal"]:
-                data["— Personal"]["Religion"] = request["personal"]["religion"]
+                if 'religion' in request["personal"]:
+                    data["— Personal"]["Religion"] = request["personal"]["religion"]
 
-            if 'inspired_by' in request["personal"]:
-                data["— Personal"]["Inspired by"] = request["personal"]["inspired_by"]
+                if 'inspired_by' in request["personal"]:
+                    data["— Personal"]["Inspired by"] = request["personal"]["inspired_by"]
 
-            if 'people_main' in request["personal"]:
-                if request["personal"]["people_main"] == 1:
-                    data["— Personal"]["People main"] = "Intellect & creativity"
-                elif request["personal"]["people_main"] == 2:
-                    data["— Personal"]["People main"] = "Kindness & honesty"
-                elif request["personal"]["people_main"] == 3:
-                    data["— Personal"]["People main"] = "Health & beauty"
-                elif request["personal"]["people_main"] == 4:
-                    data["— Personal"]["People main"] = "Wealth & power"
-                elif request["personal"]["people_main"] == 5:
-                    data["— Personal"]["People main"] = "Courage & persistance"
-                elif request["personal"]["people_main"] == 6:
-                    data["— Personal"]["People main"] = "Humor & love for life"
+                if 'people_main' in request["personal"]:
+                    if request["personal"]["people_main"] == 1:
+                        data["— Personal"]["People main"] = "Intellect & creativity"
+                    elif request["personal"]["people_main"] == 2:
+                        data["— Personal"]["People main"] = "Kindness & honesty"
+                    elif request["personal"]["people_main"] == 3:
+                        data["— Personal"]["People main"] = "Health & beauty"
+                    elif request["personal"]["people_main"] == 4:
+                        data["— Personal"]["People main"] = "Wealth & power"
+                    elif request["personal"]["people_main"] == 5:
+                        data["— Personal"]["People main"] = "Courage & persistance"
+                    elif request["personal"]["people_main"] == 6:
+                        data["— Personal"]["People main"] = "Humor & love for life"
 
-            if 'life_main' in request["personal"]:
-                if request["personal"]["life_main"] == 1:
-                    data["— Personal"]["Life main"] = "Family & children"
-                elif request["personal"]["life_main"] == 2:
-                    data["— Personal"]["Life main"] = "Career & money"
-                elif request["personal"]["life_main"] == 3:
-                    data["— Personal"]["Life main"] = "Entertainment & leisure"
-                elif request["personal"]["life_main"] == 4:
-                    data["— Personal"]["Life main"] = "Science & research"
-                elif request["personal"]["life_main"] == 5:
-                    data["— Personal"]["Life main"] = "Improving the world"
-                elif request["personal"]["life_main"] == 6:
-                    data["— Personal"]["Life main"] = "Personal development"
-                elif request["personal"]["life_main"] == 7:
-                    data["— Personal"]["Life main"] = "Beauty & art"
-                elif request["personal"]["life_main"] == 8:
-                    data["— Personal"]["Life main"] = "Fame & influence"
+                if 'life_main' in request["personal"]:
+                    if request["personal"]["life_main"] == 1:
+                        data["— Personal"]["Life main"] = "Family & children"
+                    elif request["personal"]["life_main"] == 2:
+                        data["— Personal"]["Life main"] = "Career & money"
+                    elif request["personal"]["life_main"] == 3:
+                        data["— Personal"]["Life main"] = "Entertainment & leisure"
+                    elif request["personal"]["life_main"] == 4:
+                        data["— Personal"]["Life main"] = "Science & research"
+                    elif request["personal"]["life_main"] == 5:
+                        data["— Personal"]["Life main"] = "Improving the world"
+                    elif request["personal"]["life_main"] == 6:
+                        data["— Personal"]["Life main"] = "Personal development"
+                    elif request["personal"]["life_main"] == 7:
+                        data["— Personal"]["Life main"] = "Beauty & art"
+                    elif request["personal"]["life_main"] == 8:
+                        data["— Personal"]["Life main"] = "Fame & influence"
 
-            if 'smoking' in request["personal"]:
-                if request["personal"]["smoking"] == 1:
-                    data["— Personal"]["Smoking"] = "Very negative"
-                elif request["personal"]["smoking"] == 2:
-                    data["— Personal"]["Smoking"] = "Negative"
-                elif request["personal"]["smoking"] == 3:
-                    data["— Personal"]["Smoking"] = "Neutral"
-                elif request["personal"]["smoking"] == 4:
-                    data["— Personal"]["Smoking"] = "Compromisable"
-                elif request["personal"]["smoking"] == 5:
-                    data["— Personal"]["Smoking"] = "Positive"
+                if 'smoking' in request["personal"]:
+                    if request["personal"]["smoking"] == 1:
+                        data["— Personal"]["Smoking"] = "Very negative"
+                    elif request["personal"]["smoking"] == 2:
+                        data["— Personal"]["Smoking"] = "Negative"
+                    elif request["personal"]["smoking"] == 3:
+                        data["— Personal"]["Smoking"] = "Neutral"
+                    elif request["personal"]["smoking"] == 4:
+                        data["— Personal"]["Smoking"] = "Compromisable"
+                    elif request["personal"]["smoking"] == 5:
+                        data["— Personal"]["Smoking"] = "Positive"
 
-            if 'alcohol' in request["personal"]:
-                if request["personal"]["alcohol"] == 1:
-                    data["— Personal"]["Alcohol"] = "Very negative"
-                elif request["personal"]["alcohol"] == 2:
-                    data["— Personal"]["Alcohol"] = "Negative"
-                elif request["personal"]["alcohol"] == 3:
-                    data["— Personal"]["Alcohol"] = "Neutral"
-                elif request["personal"]["alcohol"] == 4:
-                    data["— Personal"]["Alcohol"] = "Compromisable"
-                elif request["personal"]["alcohol"] == 5:
-                    data["— Personal"]["Alcohol"] = "Positive"
+                if 'alcohol' in request["personal"]:
+                    if request["personal"]["alcohol"] == 1:
+                        data["— Personal"]["Alcohol"] = "Very negative"
+                    elif request["personal"]["alcohol"] == 2:
+                        data["— Personal"]["Alcohol"] = "Negative"
+                    elif request["personal"]["alcohol"] == 3:
+                        data["— Personal"]["Alcohol"] = "Neutral"
+                    elif request["personal"]["alcohol"] == 4:
+                        data["— Personal"]["Alcohol"] = "Compromisable"
+                    elif request["personal"]["alcohol"] == 5:
+                        data["— Personal"]["Alcohol"] = "Positive"
 
         if 'mobile_phone' in request:
             if len(request["mobile_phone"]) == 0:
