@@ -67,7 +67,7 @@ def get_info(message):
         if 'id' in request:
             data["— ID"] = request['id']
 
-        if 'first_name' and 'last_name' in request:
+        if 'first_name' in request and 'last_name' in request:
             data["— Name"] = request['first_name'] + ' ' + request['last_name']
         else:
             if 'first_name' in request:
@@ -176,7 +176,7 @@ def get_info(message):
                     if 'country_id' in i:
                         data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Country'] = \
                             get_country_str(i['country_id'])['title']
-                    if 'from' and 'until' in i:
+                    if 'from' in i and 'until' in i:
                         data["— Military"]["#" + str(x + 1) + ", " + i['unit']]['Time'] = str(i['from']) + ' — ' + str(
                             i['until'])
                     else:
@@ -227,7 +227,7 @@ def get_info(message):
                 relatives = []
                 for i in request["relatives"]:
                     if i["id"] < 0:
-                        if 'id' and 'name' in i:
+                        if 'id' in i and 'name' in i:
                             relatives.append(i["type"].capitalize() + ": " + i['name'])
                         else:
                             relatives.append(i["type"].capitalize() + ":" + " no link")
@@ -245,7 +245,7 @@ def get_info(message):
                     if 'name' in i:
                         data['— Schools']["#" + str(x + 1) + ", " + i['name']] = {}
 
-                    if 'country' and 'city' in i:
+                    if 'country' in i and 'city' in i:
                         country_str = get_country_str(i['country'])['title']
                         city_str = get_city_str(i['city'])['title']
                         data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Place'] = str(country_str) + ', ' + str(
@@ -258,7 +258,7 @@ def get_info(message):
                             data['— Schools']["#" + str(x + 1) + ", " + i['name']]['City'] = get_city_str(i['city'])[
                                 'title']
 
-                    if 'year_from' and 'year_to' in i:
+                    if 'year_from' in i and 'year_to' in i:
                         data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Studying'] = str(
                             i['year_from']) + ' — ' + str(i['year_to'])
                     else:
@@ -266,6 +266,7 @@ def get_info(message):
                             data['— Schools']["#" + str(x + 1) + ", " + i['name']]['From'] = i['year_from']
                         if 'year_to' in i:
                             data['— Schools']["#" + str(x + 1) + ", " + i['name']]['To'] = i['year_to']
+
                     if 'year_graduated' in i:
                         data['— Schools']["#" + str(x + 1) + ", " + i['name']]['Graduated'] = i['year_graduated']
                     if 'class' in i:
@@ -301,7 +302,7 @@ def get_info(message):
                                 data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
                                     'City'] = get_city_str(i['city_id'])['title']
 
-                        if 'from' and 'until' in i:
+                        if 'from' in i and 'until' in i:
                             data["— Career"]["#" + str(x + 1) + ", " + '@public' + str(i['group_id'])][
                                 'Period'] = str(i['from']) + ' — ' + str(i['until'])
                         else:
@@ -318,7 +319,7 @@ def get_info(message):
                     if 'company' in i:
                         data["— Career"]["#" + str(x + 1) + ", " + i['company']] = {}
 
-                        if 'country_id' and 'city_id' in i:
+                        if 'country_id' in i and 'city_id' in i:
                             country_str = get_country_str(i['country_id'])['title']
                             city_str = get_city_str(i['city_id'])['title']
                             data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Place'] = str(
@@ -331,7 +332,7 @@ def get_info(message):
                                 data["— Career"]["#" + str(x + 1) + ", " + i['company']]['City'] = \
                                     get_city_str(i['city_id'])['title']
 
-                        if 'from' and 'until' in i:
+                        if 'from' in i and 'until' in i:
                             data["— Career"]["#" + str(x + 1) + ", " + i['company']]['Period'] = str(
                                 i['from']) + ' — ' + str(i['until'])
                         else:
@@ -383,7 +384,7 @@ def get_info(message):
 
         if 'occupation' in request:
             data['— Occupation'] = {}
-            if 'name' and 'id' in request["occupation"]:
+            if 'name' in request["occupation"] and 'id' in request["occupation"]:
                 data['— Occupation']["Place"] = request["occupation"]["name"]
                 data['— Occupation']['ID'] = '@public' + str(request["occupation"]["id"])
             else:
@@ -538,96 +539,102 @@ def get_info(message):
                     else:
                         data["— Counters"]["Pages"] = request["counters"]["pages"]
 
+                if 'clips_followers' in request["counters"]:
+                    if request["counters"]["pages"] == 0:
+                        pass
+                    else:
+                        data["— Counters"]["Clips subs"] = request["counters"]["clips_followers"]
+
         if 'personal' in request:
-            if len(request['personal']) == 0:
-                pass
-            else:
-                data["— Personal"] = {}
-                if 'political' in request["personal"]:
-                    if request["personal"]["political"] == 1:
-                        data["— Personal"]["Political"] = "Communist"
-                    elif request["personal"]["political"] == 2:
-                        data["— Personal"]["Political"] = "Socialist"
-                    elif request["personal"]["political"] == 3:
-                        data["— Personal"]["Political"] = "Moderate"
-                    elif request["personal"]["political"] == 4:
-                        data["— Personal"]["Political"] = "Liberal"
-                    elif request["personal"]["political"] == 5:
-                        data["— Personal"]["Political"] = "Conservative"
-                    elif request["personal"]["political"] == 6:
-                        data["— Personal"]["Political"] = "Monarchist"
-                    elif request["personal"]["political"] == 7:
-                        data["— Personal"]["Political"] = "Ultraconservative"
-                    elif request["personal"]["political"] == 8:
-                        data["— Personal"]["Political"] = "Apathetic"
-                    elif request["personal"]["political"] == 9:
-                        data["— Personal"]["Political"] = "Libertarian"
+            data["— Personal"] = {}
+            if 'political' in request["personal"]:
+                if request["personal"]["political"] == 1:
+                    data["— Personal"]["Political"] = "Communist"
+                elif request["personal"]["political"] == 2:
+                    data["— Personal"]["Political"] = "Socialist"
+                elif request["personal"]["political"] == 3:
+                    data["— Personal"]["Political"] = "Moderate"
+                elif request["personal"]["political"] == 4:
+                    data["— Personal"]["Political"] = "Liberal"
+                elif request["personal"]["political"] == 5:
+                    data["— Personal"]["Political"] = "Conservative"
+                elif request["personal"]["political"] == 6:
+                    data["— Personal"]["Political"] = "Monarchist"
+                elif request["personal"]["political"] == 7:
+                    data["— Personal"]["Political"] = "Ultraconservative"
+                elif request["personal"]["political"] == 8:
+                    data["— Personal"]["Political"] = "Apathetic"
+                elif request["personal"]["political"] == 9:
+                    data["— Personal"]["Political"] = "Libertarian"
 
-                if 'langs' in request["personal"]:
-                    langs = ', '.join(map(str, request["personal"]["langs"]))
-                    data["— Personal"]["Languages"] = langs
+            if 'langs' in request["personal"]:
+                langs = ', '.join(map(str, request["personal"]["langs"]))
+                data["— Personal"]["Languages"] = langs
 
-                if 'religion' in request["personal"]:
-                    data["— Personal"]["Religion"] = request["personal"]["religion"]
+            if 'religion' in request["personal"]:
+                data["— Personal"]["Religion"] = request["personal"]["religion"]
 
-                if 'inspired_by' in request["personal"]:
-                    data["— Personal"]["Inspired by"] = request["personal"]["inspired_by"]
+            if 'inspired_by' in request["personal"]:
+                data["— Personal"]["Inspired by"] = request["personal"]["inspired_by"]
 
-                if 'people_main' in request["personal"]:
-                    if request["personal"]["people_main"] == 1:
-                        data["— Personal"]["People main"] = "Intellect & creativity"
-                    elif request["personal"]["people_main"] == 2:
-                        data["— Personal"]["People main"] = "Kindness & honesty"
-                    elif request["personal"]["people_main"] == 3:
-                        data["— Personal"]["People main"] = "Health & beauty"
-                    elif request["personal"]["people_main"] == 4:
-                        data["— Personal"]["People main"] = "Wealth & power"
-                    elif request["personal"]["people_main"] == 5:
-                        data["— Personal"]["People main"] = "Courage & persistance"
-                    elif request["personal"]["people_main"] == 6:
-                        data["— Personal"]["People main"] = "Humor & love for life"
+            if 'people_main' in request["personal"]:
+                if request["personal"]["people_main"] == 1:
+                    data["— Personal"]["People main"] = "Intellect & creativity"
+                elif request["personal"]["people_main"] == 2:
+                    data["— Personal"]["People main"] = "Kindness & honesty"
+                elif request["personal"]["people_main"] == 3:
+                    data["— Personal"]["People main"] = "Health & beauty"
+                elif request["personal"]["people_main"] == 4:
+                    data["— Personal"]["People main"] = "Wealth & power"
+                elif request["personal"]["people_main"] == 5:
+                    data["— Personal"]["People main"] = "Courage & persistance"
+                elif request["personal"]["people_main"] == 6:
+                    data["— Personal"]["People main"] = "Humor & love for life"
 
-                if 'life_main' in request["personal"]:
-                    if request["personal"]["life_main"] == 1:
-                        data["— Personal"]["Life main"] = "Family & children"
-                    elif request["personal"]["life_main"] == 2:
-                        data["— Personal"]["Life main"] = "Career & money"
-                    elif request["personal"]["life_main"] == 3:
-                        data["— Personal"]["Life main"] = "Entertainment & leisure"
-                    elif request["personal"]["life_main"] == 4:
-                        data["— Personal"]["Life main"] = "Science & research"
-                    elif request["personal"]["life_main"] == 5:
-                        data["— Personal"]["Life main"] = "Improving the world"
-                    elif request["personal"]["life_main"] == 6:
-                        data["— Personal"]["Life main"] = "Personal development"
-                    elif request["personal"]["life_main"] == 7:
-                        data["— Personal"]["Life main"] = "Beauty & art"
-                    elif request["personal"]["life_main"] == 8:
-                        data["— Personal"]["Life main"] = "Fame & influence"
+            if 'life_main' in request["personal"]:
+                if request["personal"]["life_main"] == 1:
+                    data["— Personal"]["Life main"] = "Family & children"
+                elif request["personal"]["life_main"] == 2:
+                    data["— Personal"]["Life main"] = "Career & money"
+                elif request["personal"]["life_main"] == 3:
+                    data["— Personal"]["Life main"] = "Entertainment & leisure"
+                elif request["personal"]["life_main"] == 4:
+                    data["— Personal"]["Life main"] = "Science & research"
+                elif request["personal"]["life_main"] == 5:
+                    data["— Personal"]["Life main"] = "Improving the world"
+                elif request["personal"]["life_main"] == 6:
+                    data["— Personal"]["Life main"] = "Personal development"
+                elif request["personal"]["life_main"] == 7:
+                    data["— Personal"]["Life main"] = "Beauty & art"
+                elif request["personal"]["life_main"] == 8:
+                    data["— Personal"]["Life main"] = "Fame & influence"
 
-                if 'smoking' in request["personal"]:
-                    if request["personal"]["smoking"] == 1:
-                        data["— Personal"]["Smoking"] = "Very negative"
-                    elif request["personal"]["smoking"] == 2:
-                        data["— Personal"]["Smoking"] = "Negative"
-                    elif request["personal"]["smoking"] == 3:
-                        data["— Personal"]["Smoking"] = "Neutral"
-                    elif request["personal"]["smoking"] == 4:
-                        data["— Personal"]["Smoking"] = "Compromisable"
-                    elif request["personal"]["smoking"] == 5:
-                        data["— Personal"]["Smoking"] = "Positive"
+            if 'smoking' in request["personal"]:
+                if request["personal"]["smoking"] == 1:
+                    data["— Personal"]["Smoking"] = "Very negative"
+                elif request["personal"]["smoking"] == 2:
+                    data["— Personal"]["Smoking"] = "Negative"
+                elif request["personal"]["smoking"] == 3:
+                    data["— Personal"]["Smoking"] = "Neutral"
+                elif request["personal"]["smoking"] == 4:
+                    data["— Personal"]["Smoking"] = "Compromisable"
+                elif request["personal"]["smoking"] == 5:
+                    data["— Personal"]["Smoking"] = "Positive"
 
-                if 'alcohol' in request["personal"]:
-                    if request["personal"]["alcohol"] == 1:
-                        data["— Personal"]["Alcohol"] = "Very negative"
-                    elif request["personal"]["alcohol"] == 2:
-                        data["— Personal"]["Alcohol"] = "Negative"
-                    elif request["personal"]["alcohol"] == 3:
-                        data["— Personal"]["Alcohol"] = "Neutral"
-                    elif request["personal"]["alcohol"] == 4:
-                        data["— Personal"]["Alcohol"] = "Compromisable"
-                    elif request["personal"]["alcohol"] == 5:
-                        data["— Personal"]["Alcohol"] = "Positive"
+            if 'alcohol' in request["personal"]:
+                if request["personal"]["alcohol"] == 1:
+                    data["— Personal"]["Alcohol"] = "Very negative"
+                elif request["personal"]["alcohol"] == 2:
+                    data["— Personal"]["Alcohol"] = "Negative"
+                elif request["personal"]["alcohol"] == 3:
+                    data["— Personal"]["Alcohol"] = "Neutral"
+                elif request["personal"]["alcohol"] == 4:
+                    data["— Personal"]["Alcohol"] = "Compromisable"
+                elif request["personal"]["alcohol"] == 5:
+                    data["— Personal"]["Alcohol"] = "Positive"
+
+            if len(data["— Personal"]) <= 0:
+                del data["— Personal"]
 
         if 'mobile_phone' in request:
             if len(request["mobile_phone"]) == 0:
@@ -656,7 +663,7 @@ def get_info(message):
         if 'facebook' in request:
             data["— Facebook"] = "facebook.com/profile.php?id=" + request["facebook"]
 
-        if 'country' and 'city' in request:
+        if 'country' in request and 'city' in request:
             if 'title' in request["country"] and 'title' in request["city"]:
                 data["— Location"] = request["country"]["title"] + ', ' + request["city"]["title"]
         else:
@@ -705,7 +712,7 @@ def get_info(message):
                 for i in request["universities"]:
                     if 'name' in i:
                         data["— Education"]["#" + str(x + 1) + ", " + i['name']] = {}
-                    if 'country' and 'city' in i:
+                    if 'country' in i and 'city' in i:
                         if i['country'] == 0 and i['city'] == 0:
                             pass
                         else:
@@ -765,7 +772,6 @@ def get_info(message):
 
         for text in ready_text:
             bot.send_message(message.from_user.id, text)
-
 
     except:
         bot.send_message(message.from_user.id, "<b>⚠️ Something went wrong. The reasons are:</b>\n"
