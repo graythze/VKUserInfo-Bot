@@ -577,7 +577,7 @@ def get_info(message):
             data["— LiveJournal"] = "@" + request["livejournal"]
 
         if 'facebook' in request:
-            data["— Facebook"] = "facebook.com/profile.php?id=" + request["facebook"]
+            data["— Facebook"] = "fb.com/profile.php?id=" + request["facebook"]
 
         if 'country' in request and 'city' in request:
             if 'title' in request["country"] and 'title' in request["city"]:
