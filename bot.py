@@ -466,7 +466,6 @@ def get_info(message):
                 del data["— Counters"]
 
         if 'personal' in request:
-            if len(request["personal"]) > 0:
                 data["— Personal"] = {}
                 if 'political' in request["personal"]:
                     if request["personal"]["political"] == 1:
@@ -556,6 +555,9 @@ def get_info(message):
                     elif request["personal"]["alcohol"] == 5:
                         data["— Personal"]["Alcohol"] = "Positive"
 
+                if len(data["— Personal"]) == 0:
+                    del data["— Personal"]
+
         if 'mobile_phone' in request:
             if len(request["mobile_phone"]) > 0:
                 data["— Mobile"] = request["mobile_phone"]
@@ -639,7 +641,8 @@ def get_info(message):
                                     get_city_str(i['city'])['title']
 
                     if 'faculty_name' in i:
-                        data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Faculty"] = i['faculty_name']
+                        if len(i['faculty_name']) > 0:
+                            data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Faculty"] = i['faculty_name']
                     if 'chair_name' in i:
                         data["— Education"]["#" + str(x + 1) + ", " + i['name']]["Program"] = i['chair_name']
                     if 'graduation' in i:
