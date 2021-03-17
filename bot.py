@@ -138,14 +138,13 @@ def get_info(message):
                 data["— Friend request"] = "Allowed"
 
         if 'sex' in request:
-            if 'first_name' in request:
-                if request['first_name'] == "DELETED":
-                    pass
-                else:
-                    if request['sex'] == 1:
-                        data["— Sex"] = 'Female'
-                    if request['sex'] == 2:
-                        data["— Sex"] = 'Male'
+            if 'last_name' == "":
+                pass
+            else:
+                if request['sex'] == 1:
+                    data["— Sex"] = 'Female'
+                if request['sex'] == 2:
+                    data["— Sex"] = 'Male'
 
         if 'verified' in request:
             if request['verified'] == 1:
@@ -214,7 +213,7 @@ def get_info(message):
                         if 'id' in i and 'name' in i:
                             relatives.append(i["type"].capitalize() + ": " + i['name'])
                         else:
-                            relatives.append(i["type"].capitalize() + ":" + " no link")
+                            relatives.append(i["type"].capitalize() + ":" + " empty")
                     else:
                         relatives.append(i["type"].capitalize() + ":" + " @id" + str(i['id']))
                 data["— Relatives"] = relatives
@@ -604,7 +603,7 @@ def get_info(message):
                     data["— Registered"] = datetime.strptime(str(parsed_xml[0])[:-6], '%Y-%m-%dT%H:%M:%S')
 
         if 'has_photo' in request:
-            if request['has_photo'] > 0:
+            if request['has_photo'] == 1:
                 if 'crop_photo' not in request:
                     data["— Avatar"] = request["photo_max_orig"]
                 else:
