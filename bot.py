@@ -138,12 +138,10 @@ def get_info(message):
                 data["— Friend request"] = "Allowed"
 
         if 'sex' in request:
-            if 'last_name' == "":
-                pass
-            else:
+            if len(request['last_name']) > 0:
                 if request['sex'] == 1:
                     data["— Sex"] = 'Female'
-                if request['sex'] == 2:
+                elif request['sex'] == 2:
                     data["— Sex"] = 'Male'
 
         if 'verified' in request:
